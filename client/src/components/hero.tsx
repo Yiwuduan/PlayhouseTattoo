@@ -7,7 +7,7 @@ export default function Hero() {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.5 }}
-      className="min-h-screen flex flex-col items-center justify-center text-center"
+      className="relative min-h-screen flex flex-col items-center justify-center text-center px-0"
     >
       <motion.h1 
         initial={{ y: 20 }}
@@ -26,7 +26,9 @@ export default function Hero() {
         WE LOVE YOU
       </motion.p>
 
-      <PortfolioGallery />
+      <div className="absolute left-0 right-0 bottom-0 w-full">
+        <PortfolioGallery />
+      </div>
     </motion.section>
   );
 }
