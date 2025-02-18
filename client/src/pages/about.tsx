@@ -1,4 +1,5 @@
 import { motion } from "framer-motion";
+import MapSection from "@/components/map-section";
 
 export default function About() {
   return (
@@ -49,7 +50,7 @@ export default function About() {
         initial={{ opacity: 0, y: 20 }}
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true }}
-        className="text-center max-w-4xl mx-auto"
+        className="text-center max-w-4xl mx-auto mb-24"
       >
         <h2 className="text-3xl font-bold tracking-tighter mb-6">
           OUR PHILOSOPHY
@@ -80,6 +81,18 @@ export default function About() {
             </div>
           ))}
         </div>
+      </motion.section>
+
+      <motion.section
+        initial={{ opacity: 0 }}
+        whileInView={{ opacity: 1 }}
+        viewport={{ once: true }}
+        className="max-w-4xl mx-auto"
+      >
+        <h2 className="text-3xl font-bold tracking-tighter mb-8 text-center">
+          VISIT US
+        </h2>
+        <MapSection />
       </motion.section>
     </div>
   );

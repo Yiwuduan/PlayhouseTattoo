@@ -7,6 +7,7 @@ import { useQuery } from "@tanstack/react-query";
 import type { Artist } from "@shared/schema";
 import ArtistGrid from "@/components/artist-grid";
 import Chatbot from "@/components/chatbot";
+import MapSection from "@/components/map-section";
 
 export default function Home() {
   const { data: artists, isLoading } = useQuery<Artist[]>({ 
@@ -41,6 +42,16 @@ export default function Home() {
             </Button>
           </>
         )}
+      </motion.section>
+
+      <motion.section
+        initial={{ opacity: 0 }}
+        whileInView={{ opacity: 1 }}
+        viewport={{ once: true }}
+        className="text-center"
+      >
+        <h2 className="text-4xl md:text-6xl font-bold tracking-tighter mb-8">FIND US</h2>
+        <MapSection />
       </motion.section>
 
       <motion.section
