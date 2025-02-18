@@ -1,9 +1,9 @@
 import { motion } from "framer-motion";
 import { Link } from "wouter";
-import { type Artist } from "@shared/schema";
+import type { Artist, PortfolioItem } from "@shared/schema";
 
 interface ArtistGridProps {
-  artists: Artist[];
+  artists: (Artist & { portfolioItems: PortfolioItem[] })[];
 }
 
 export default function ArtistGrid({ artists }: ArtistGridProps) {
@@ -19,11 +19,23 @@ export default function ArtistGrid({ artists }: ArtistGridProps) {
           <Link href={`/artists/${artist.slug}`}>
             <a className="group block">
               <div className="aspect-square overflow-hidden bg-muted">
-                <img
-                  src={artist.portfolio[0]}
-                  alt={artist.name}
-                  className="object-cover w-full h-full transition-transform group-hover:scale-105"
-                />
+                {artist.portfolioItems[0] ? (
+                  <img
+                    src={artist.portfolioItems[0].imageUrl}
+                    alt={artist.portfolioItems[0].title || artist.name}
+                    className="object-cover w-full h-full transition-transform group-hover:scale-105"
+                  />
+                ) : artist.profileImage ? (
+                  <img
+                    src={artist.profileImage}
+                    alt={artist.name}
+                    className="object-cover w-full h-full transition-transform group-hover:scale-105"
+                  />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center text-muted-foreground">
+                    No portfolio images
+                  </div>
+                )}
               </div>
               <div className="mt-4">
                 <h3 className="text-xl font-bold">{artist.name}</h3>

@@ -1,23 +1,31 @@
-import { type Artist, type InsertArtist, type Booking, type InsertBooking, artists, bookings } from "@shared/schema";
+import { type Artist, type InsertArtist, type Booking, type InsertBooking, type PortfolioItem, type InsertPortfolioItem, artists, bookings, portfolioItems } from "@shared/schema";
 import { db } from "./db";
 import { eq } from "drizzle-orm";
 
 export interface IStorage {
-  getAllArtists(): Promise<Artist[]>;
-  getArtistBySlug(slug: string): Promise<Artist | undefined>;
+  getAllArtists(): Promise<(Artist & { portfolioItems: PortfolioItem[] })[]>;
+  getArtistBySlug(slug: string): Promise<(Artist & { portfolioItems: PortfolioItem[] }) | undefined>;
   createBooking(booking: InsertBooking): Promise<Booking>;
+  addPortfolioItem(item: InsertPortfolioItem): Promise<PortfolioItem>;
 }
 
 export class DatabaseStorage implements IStorage {
-  async getAllArtists(): Promise<Artist[]> {
-    return await db.select().from(artists);
+  async getAllArtists(): Promise<(Artist & { portfolioItems: PortfolioItem[] })[]> {
+    const artistsWithPortfolio = await db.query.artists.findMany({
+      with: {
+        portfolioItems: true,
+      },
+    });
+    return artistsWithPortfolio;
   }
 
-  async getArtistBySlug(slug: string): Promise<Artist | undefined> {
-    const [artist] = await db
-      .select()
-      .from(artists)
-      .where(eq(artists.slug, slug));
+  async getArtistBySlug(slug: string): Promise<(Artist & { portfolioItems: PortfolioItem[] }) | undefined> {
+    const [artist] = await db.query.artists.findMany({
+      with: {
+        portfolioItems: true,
+      },
+      where: eq(artists.slug, slug),
+    });
     return artist;
   }
 
@@ -27,6 +35,14 @@ export class DatabaseStorage implements IStorage {
       .values(insertBooking)
       .returning();
     return booking;
+  }
+
+  async addPortfolioItem(item: InsertPortfolioItem): Promise<PortfolioItem> {
+    const [portfolioItem] = await db
+      .insert(portfolioItems)
+      .values(item)
+      .returning();
+    return portfolioItem;
   }
 }
 

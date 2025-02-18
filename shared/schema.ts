@@ -1,4 +1,5 @@
 import { pgTable, text, serial, timestamp, jsonb } from "drizzle-orm/pg-core";
+import { relations } from "drizzle-orm";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
@@ -8,8 +9,34 @@ export const artists = pgTable("artists", {
   slug: text("slug").notNull().unique(),
   bio: text("bio").notNull(),
   specialties: text("specialties").array().notNull(),
-  portfolio: jsonb("portfolio").notNull().$type<string[]>(),
+  // Profile specific fields
+  profileImage: text("profile_image"),
+  instagram: text("instagram"),
+  experience: text("experience"),
+  style: text("style"),
 });
+
+// Define artist relations
+export const artistRelations = relations(artists, ({ many }) => ({
+  portfolioItems: many(portfolioItems),
+}));
+
+export const portfolioItems = pgTable("portfolio_items", {
+  id: serial("id").primaryKey(),
+  artistId: serial("artist_id").references(() => artists.id),
+  imageUrl: text("image_url").notNull(),
+  title: text("title"),
+  description: text("description"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Define portfolio relations
+export const portfolioRelations = relations(portfolioItems, ({ one }) => ({
+  artist: one(artists, {
+    fields: [portfolioItems.artistId],
+    references: [artists.id],
+  }),
+}));
 
 export const bookings = pgTable("bookings", {
   id: serial("id").primaryKey(),
@@ -21,9 +48,12 @@ export const bookings = pgTable("bookings", {
 });
 
 export const insertArtistSchema = createInsertSchema(artists);
+export const insertPortfolioItemSchema = createInsertSchema(portfolioItems);
 export const insertBookingSchema = createInsertSchema(bookings);
 
 export type Artist = typeof artists.$inferSelect;
 export type InsertArtist = z.infer<typeof insertArtistSchema>;
+export type PortfolioItem = typeof portfolioItems.$inferSelect;
+export type InsertPortfolioItem = z.infer<typeof insertPortfolioItemSchema>;
 export type Booking = typeof bookings.$inferSelect;
 export type InsertBooking = z.infer<typeof insertBookingSchema>;

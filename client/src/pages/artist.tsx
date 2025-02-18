@@ -1,14 +1,14 @@
 import { useQuery } from "@tanstack/react-query";
 import { useParams } from "wouter";
 import { motion } from "framer-motion";
-import type { Artist } from "@shared/schema";
+import type { Artist, PortfolioItem } from "@shared/schema";
 import { Button } from "@/components/ui/button";
 import { Link } from "wouter";
 import { CalendarIcon } from "lucide-react";
 
 export default function Artist() {
   const { slug } = useParams();
-  const { data: artist, isLoading } = useQuery<Artist>({
+  const { data: artist, isLoading } = useQuery<Artist & { portfolioItems: PortfolioItem[] }>({
     queryKey: [`/api/artists/${slug}`]
   });
 
@@ -74,17 +74,17 @@ export default function Artist() {
         transition={{ delay: 0.2 }}
         className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
       >
-        {artist.portfolio.map((image, index) => (
+        {artist.portfolioItems.map((item: PortfolioItem, index: number) => (
           <motion.div
-            key={index}
+            key={item.id}
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: index * 0.1 }}
             className="aspect-square bg-muted overflow-hidden"
           >
             <img
-              src={image}
-              alt={`${artist.name}'s work ${index + 1}`}
+              src={item.imageUrl}
+              alt={item.title || `${artist.name}'s work ${index + 1}`}
               className="w-full h-full object-cover hover:scale-105 transition-transform"
             />
           </motion.div>

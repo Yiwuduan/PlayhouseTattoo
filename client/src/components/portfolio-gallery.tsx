@@ -1,14 +1,14 @@
 import { motion } from "framer-motion";
 import { useQuery } from "@tanstack/react-query";
-import type { Artist } from "@shared/schema";
+import type { Artist, PortfolioItem } from "@shared/schema";
 
 export default function PortfolioGallery() {
-  const { data: artists } = useQuery<Artist[]>({
+  const { data: artists } = useQuery<(Artist & { portfolioItems: PortfolioItem[] })[]>({
     queryKey: ['/api/artists']
   });
 
-  // Combine all portfolio images into a single array
-  const allImages = artists?.flatMap(artist => artist.portfolio) || [];
+  // Combine all portfolio images into a single array of portfolio items
+  const allPortfolioItems = artists?.flatMap(artist => artist.portfolioItems) || [];
 
   return (
     <div className="w-[100vw] relative left-[50%] right-[50%] ml-[-50vw] mr-[-50vw] overflow-hidden">
@@ -28,16 +28,16 @@ export default function PortfolioGallery() {
         }}
       >
         {/* Double the images to create seamless loop */}
-        {[...allImages, ...allImages].map((image, i) => (
+        {[...allPortfolioItems, ...allPortfolioItems].map((item: PortfolioItem, i: number) => (
           <motion.div
-            key={i}
+            key={`${item.id}-${i}`}
             className="shrink-0 aspect-square w-72 bg-muted overflow-hidden rounded-lg"
             whileHover={{ scale: 1.05 }}
             transition={{ duration: 0.2 }}
           >
             <img
-              src={image}
-              alt={`Portfolio piece ${i + 1}`}
+              src={item.imageUrl}
+              alt={item.title || `Portfolio piece ${i + 1}`}
               className="w-full h-full object-cover"
             />
           </motion.div>
