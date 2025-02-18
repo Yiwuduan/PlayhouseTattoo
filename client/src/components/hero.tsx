@@ -22,20 +22,13 @@ export default function Hero() {
           initial={{ y: 20 }}
           animate={{ y: 0 }}
           transition={{ delay: 0.2 }}
-          className="text-2xl md:text-4xl text-muted-foreground"
+          className="text-2xl md:text-4xl text-muted-foreground mb-12"
         >
           WE LOVE YOU
         </motion.p>
 
-        <motion.div
-          initial={{ y: 20, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          transition={{ delay: 0.4 }}
-          className="w-px h-32 bg-border mt-8"
-        />
+        <PortfolioGallery />
       </motion.section>
-
-      <PortfolioGallery />
     </div>
   );
 }

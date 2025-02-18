@@ -11,7 +11,7 @@ export default function PortfolioGallery() {
   const allImages = artists?.flatMap(artist => artist.portfolio) || [];
 
   return (
-    <div className="w-full overflow-hidden my-24">
+    <div className="w-[100vw] relative left-[50%] right-[50%] ml-[-50vw] mr-[-50vw] overflow-hidden">
       <motion.div 
         className="flex gap-4"
         initial={{ x: 0 }}
