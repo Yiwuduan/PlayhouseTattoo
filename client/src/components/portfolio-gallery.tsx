@@ -13,17 +13,17 @@ export default function PortfolioGallery() {
   return (
     <div className="w-[100vw] relative left-[50%] right-[50%] ml-[-50vw] mr-[-50vw] overflow-hidden">
       <motion.div 
-        className="flex gap-4 px-4"
-        initial={{ x: "100%" }}
+        className="flex gap-8 py-8"
+        initial={{ x: "0%" }}
         animate={{ 
-          x: "-100%",
-          transition: {
-            x: {
-              repeat: Infinity,
-              repeatType: "loop",
-              duration: 30,
-              ease: "linear"
-            }
+          x: "-50%",
+        }}
+        transition={{
+          x: {
+            repeat: Infinity,
+            repeatType: "loop",
+            duration: 20,
+            ease: "linear"
           }
         }}
       >
@@ -31,7 +31,7 @@ export default function PortfolioGallery() {
         {[...allImages, ...allImages].map((image, i) => (
           <motion.div
             key={i}
-            className="shrink-0 aspect-square w-64 bg-muted overflow-hidden"
+            className="shrink-0 aspect-square w-72 bg-muted overflow-hidden rounded-lg"
             whileHover={{ scale: 1.05 }}
             transition={{ duration: 0.2 }}
           >

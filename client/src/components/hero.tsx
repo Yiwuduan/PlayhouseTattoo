@@ -3,32 +3,30 @@ import PortfolioGallery from "./portfolio-gallery";
 
 export default function Hero() {
   return (
-    <div className="flex flex-col">
-      <motion.section 
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 0.5 }}
-        className="h-screen flex flex-col items-center justify-center text-center gap-8 pt-16"
+    <motion.section 
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.5 }}
+      className="min-h-screen flex flex-col items-center justify-center text-center"
+    >
+      <motion.h1 
+        initial={{ y: 20 }}
+        animate={{ y: 0 }}
+        className="text-6xl md:text-8xl font-bold tracking-tighter"
       >
-        <motion.h1 
-          initial={{ y: 20 }}
-          animate={{ y: 0 }}
-          className="text-6xl md:text-8xl font-bold tracking-tighter"
-        >
-          WELCOME BACK
-        </motion.h1>
+        WELCOME BACK
+      </motion.h1>
 
-        <motion.p
-          initial={{ y: 20 }}
-          animate={{ y: 0 }}
-          transition={{ delay: 0.2 }}
-          className="text-2xl md:text-4xl text-muted-foreground mb-12"
-        >
-          WE LOVE YOU
-        </motion.p>
+      <motion.p
+        initial={{ y: 20 }}
+        animate={{ y: 0 }}
+        transition={{ delay: 0.2 }}
+        className="text-2xl md:text-4xl text-muted-foreground mb-16"
+      >
+        WE LOVE YOU
+      </motion.p>
 
-        <PortfolioGallery />
-      </motion.section>
-    </div>
+      <PortfolioGallery />
+    </motion.section>
   );
 }
