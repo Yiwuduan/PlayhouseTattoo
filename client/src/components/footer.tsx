@@ -43,9 +43,9 @@ export function Footer() {
               </a>
             </div>
             <div className="text-sm text-muted-foreground">
-              <p>123 Fashion District</p>
-              <p>New York, NY 10001</p>
-              <p>+1 (555) 123-4567</p>
+              <p>900 Rathburn Rd. W</p>
+              <p>Mississauga, ON, Canada</p>
+              <p>(905) 276-4800</p>
             </div>
           </div>
         </div>
