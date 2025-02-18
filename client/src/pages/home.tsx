@@ -6,7 +6,6 @@ import { ArrowRight } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import type { Artist } from "@shared/schema";
 import ArtistGrid from "@/components/artist-grid";
-import Chatbot from "@/components/chatbot";
 import MapSection from "@/components/map-section";
 
 export default function Home() {
@@ -52,24 +51,6 @@ export default function Home() {
       >
         <h2 className="text-4xl md:text-6xl font-bold tracking-tighter mb-8">FIND US</h2>
         <MapSection />
-      </motion.section>
-
-      <motion.section
-        initial={{ opacity: 0, y: 20 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true }}
-        className="grid md:grid-cols-2 gap-12 items-center"
-      >
-        <div>
-          <h2 className="text-3xl md:text-5xl font-bold tracking-tighter mb-6">
-            Have Questions?
-          </h2>
-          <p className="text-lg text-muted-foreground mb-8">
-            Our AI assistant is here to help you with any questions about tattoos, 
-            aftercare, or the tattooing process.
-          </p>
-        </div>
-        <Chatbot />
       </motion.section>
     </div>
   );

@@ -10,6 +10,7 @@ import Artist from "@/pages/artist";
 import About from "@/pages/about";
 import Book from "@/pages/book";
 import NotFound from "@/pages/not-found";
+import Chatbot from "@/components/chatbot";
 
 function Router() {
   return (
@@ -26,6 +27,7 @@ function Router() {
         </Switch>
       </main>
       <Footer />
+      <Chatbot />
     </div>
   );
 }
