@@ -13,15 +13,15 @@ export default function PortfolioGallery() {
   return (
     <div className="w-[100vw] relative left-[50%] right-[50%] ml-[-50vw] mr-[-50vw] overflow-hidden">
       <motion.div 
-        className="flex gap-4"
-        initial={{ x: 0 }}
+        className="flex gap-4 px-4"
+        initial={{ x: "100%" }}
         animate={{ 
-          x: [0, -1000],
+          x: "-100%",
           transition: {
             x: {
               repeat: Infinity,
               repeatType: "loop",
-              duration: 20,
+              duration: 30,
               ease: "linear"
             }
           }
