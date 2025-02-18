@@ -26,13 +26,13 @@ export default function Home() {
         <h2 className="text-4xl md:text-6xl font-bold tracking-tighter mb-8">OUR ARTISTS</h2>
         {isLoading ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {[...Array(3)].map((_, i) => (
+            {[...Array(6)].map((_, i) => (
               <div key={i} className="aspect-square bg-muted animate-pulse" />
             ))}
           </div>
         ) : (
           <>
-            <ArtistGrid artists={artists?.slice(0, 3) || []} />
+            <ArtistGrid artists={artists || []} />
             <Button asChild className="mt-12" size="lg">
               <Link href="/artists">
                 View All Artists
