@@ -8,7 +8,7 @@ export function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {/* Logo and Description */}
           <div className="space-y-4">
-            <h3 className="text-xl font-bold tracking-tighter">INKVERSE</h3>
+            <h3 className="text-xl font-bold tracking-tighter">PLAYHOUSE</h3>
             <p className="text-sm text-muted-foreground max-w-xs">
               Where artistry meets skin. Premium tattoo experiences in a luxurious setting.
             </p>
@@ -37,7 +37,7 @@ export function Footer() {
                 <Facebook className="h-5 w-5" />
                 <span className="sr-only">Facebook</span>
               </a>
-              <a href="mailto:contact@inkverse.com" className="text-muted-foreground hover:text-foreground transition-colors">
+              <a href="mailto:contact@playhouse.com" className="text-muted-foreground hover:text-foreground transition-colors">
                 <Mail className="h-5 w-5" />
                 <span className="sr-only">Email</span>
               </a>
@@ -51,7 +51,7 @@ export function Footer() {
         </div>
 
         <div className="mt-12 pt-8 border-t text-center text-sm text-muted-foreground">
-          <p>&copy; {new Date().getFullYear()} InkVerse. All rights reserved.</p>
+          <p>&copy; {new Date().getFullYear()} Playhouse. All rights reserved.</p>
         </div>
       </div>
     </footer>
