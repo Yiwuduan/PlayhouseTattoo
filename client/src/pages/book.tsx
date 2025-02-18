@@ -19,10 +19,18 @@ import { format } from "date-fns";
 
 export default function Book() {
   const { toast } = useToast();
-  const [_, setLocation] = useLocation();
+  const [location, setLocation] = useLocation();
+
+  // Get the artist slug from URL parameters
+  const params = new URLSearchParams(window.location.search);
+  const artistSlug = params.get('artist');
+
   const { data: artists } = useQuery<Artist[]>({
     queryKey: ['/api/artists']
   });
+
+  // Find the artist by slug if it exists
+  const selectedArtist = artists?.find(artist => artist.slug === artistSlug);
 
   const form = useForm<InsertBooking>({
     resolver: zodResolver(insertBookingSchema),
@@ -31,6 +39,8 @@ export default function Book() {
       email: "",
       message: "",
       date: new Date(),
+      // Set the default artistId if we have a selected artist
+      artistId: selectedArtist?.id
     }
   });
 
@@ -98,7 +108,10 @@ export default function Book() {
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Artist</FormLabel>
-                  <Select onValueChange={field.onChange} defaultValue={field.value?.toString()}>
+                  <Select 
+                    onValueChange={field.onChange} 
+                    defaultValue={selectedArtist ? selectedArtist.id.toString() : undefined}
+                  >
                     <FormControl>
                       <SelectTrigger>
                         <SelectValue placeholder="Select an artist" />
