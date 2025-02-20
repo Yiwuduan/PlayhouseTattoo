@@ -145,5 +145,33 @@ export async function registerRoutes(app: Express) {
     res.json({ response });
   });
 
+  app.patch("/api/artists/:id", async (req, res) => {
+    try {
+      const artistId = parseInt(req.params.id);
+      const { bio, specialties } = req.body;
+
+      if (!bio || !Array.isArray(specialties)) {
+        return res.status(400).json({ message: "Invalid request data" });
+      }
+
+      const updatedArtist = await storage.updateArtist(artistId, {
+        bio,
+        specialties
+      });
+
+      if (!updatedArtist) {
+        return res.status(404).json({ message: "Artist not found" });
+      }
+
+      res.json(updatedArtist);
+    } catch (error: any) {
+      console.error('Error updating artist:', error);
+      res.status(500).json({ 
+        message: "Failed to update artist", 
+        error: error.message || 'Unknown error occurred'
+      });
+    }
+  });
+
   return httpServer;
 }

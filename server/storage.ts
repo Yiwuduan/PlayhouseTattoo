@@ -12,6 +12,7 @@ export interface IStorage {
   createBooking(booking: InsertBooking): Promise<Booking>;
   addPortfolioItem(item: InsertPortfolioItem): Promise<PortfolioItem>;
   updateArtistProfileImage(artistId: number, imageUrl: string): Promise<void>;
+  updateArtist(artistId: number, data: { bio: string; specialties: string[] }): Promise<Artist>;
   // User-related methods
   getUser(id: number): Promise<User | undefined>;
   getUserByUsername(username: string): Promise<User | undefined>;
@@ -56,6 +57,23 @@ export class DatabaseStorage implements IStorage {
       .update(artists)
       .set({ profileImage: imageUrl })
       .where(eq(artists.id, artistId));
+  }
+
+  async updateArtist(artistId: number, data: { bio: string; specialties: string[] }): Promise<Artist> {
+    const [updatedArtist] = await db
+      .update(artists)
+      .set({
+        bio: data.bio,
+        specialties: data.specialties,
+      })
+      .where(eq(artists.id, artistId))
+      .returning();
+
+    if (!updatedArtist) {
+      throw new Error("Artist not found");
+    }
+
+    return updatedArtist;
   }
 
   async createBooking(insertBooking: InsertBooking): Promise<Booking> {
