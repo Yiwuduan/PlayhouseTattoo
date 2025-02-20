@@ -7,6 +7,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { EyeIcon, EyeOffIcon } from "lucide-react";
+import { useState } from "react";
 
 const loginSchema = z.object({
   username: z.string().default("admin"),
@@ -18,6 +20,7 @@ type LoginValues = z.infer<typeof loginSchema>;
 export default function AuthPage() {
   const { loginMutation, user } = useAuth();
   const [, setLocation] = useLocation();
+  const [showPassword, setShowPassword] = useState(false);
 
   // Redirect if already logged in
   if (user) {
@@ -43,7 +46,7 @@ export default function AuthPage() {
           <Form {...form}>
             <form
               onSubmit={form.handleSubmit((data) => {
-                console.log("Submitting with data:", data); // Debug log
+                console.log("Submitting with data:", data);
                 loginMutation.mutate(data);
               })}
               className="space-y-4"
@@ -55,7 +58,28 @@ export default function AuthPage() {
                   <FormItem>
                     <FormLabel>Password</FormLabel>
                     <FormControl>
-                      <Input type="password" {...field} />
+                      <div className="relative">
+                        <Input 
+                          type={showPassword ? "text" : "password"} 
+                          {...field} 
+                        />
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="icon"
+                          className="absolute right-2 top-1/2 -translate-y-1/2 h-8 w-8"
+                          onClick={() => setShowPassword(!showPassword)}
+                        >
+                          {showPassword ? (
+                            <EyeOffIcon className="h-4 w-4" />
+                          ) : (
+                            <EyeIcon className="h-4 w-4" />
+                          )}
+                          <span className="sr-only">
+                            {showPassword ? "Hide password" : "Show password"}
+                          </span>
+                        </Button>
+                      </div>
                     </FormControl>
                     <FormMessage />
                   </FormItem>

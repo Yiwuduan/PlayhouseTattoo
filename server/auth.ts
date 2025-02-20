@@ -60,7 +60,7 @@ export function setupAuth(app: Express) {
   });
 
   // Admin middleware
-  const requireAdmin = (req: Express.Request, res: Express.Response, next: Express.NextFunction) => {
+  const requireAdmin = (req: Express.Request, res: Express.Response, next: Function) => {
     if (!req.isAuthenticated()) {
       return res.status(403).send("Unauthorized");
     }
