@@ -58,20 +58,17 @@ export async function registerRoutes(app: Express) {
 
       if (!req.files || Object.keys(req.files).length === 0) {
         console.log('No files were uploaded'); // Debug log
-        res.status(400).json({ message: "No files were uploaded" });
-        return;
+        return res.status(400).json({ message: "No files were uploaded" });
       }
 
       const image = req.files.image as UploadedFile;
       if (!image) {
         console.log('No image file found in request'); // Debug log
-        res.status(400).json({ message: "No image file found in request" });
-        return;
+        return res.status(400).json({ message: "No image file found in request" });
       }
 
       if (Array.isArray(image)) {
-        res.status(400).json({ message: "Please upload only one image" });
-        return;
+        return res.status(400).json({ message: "Please upload only one image" });
       }
 
       const fileName = `profile-${artistId}-${Date.now()}${path.extname(image.name)}`;
@@ -82,10 +79,10 @@ export async function registerRoutes(app: Express) {
       const imageUrl = `/uploads/${fileName}`;
 
       await storage.updateArtistProfileImage(artistId, imageUrl);
-      res.json({ imageUrl });
+      return res.json({ imageUrl });
     } catch (error: any) {
       console.error('Error uploading profile image:', error);
-      res.status(500).json({ 
+      return res.status(500).json({ 
         message: "Failed to upload image", 
         error: error.message || 'Unknown error occurred'
       });
@@ -99,20 +96,17 @@ export async function registerRoutes(app: Express) {
 
       if (!req.files || Object.keys(req.files).length === 0) {
         console.log('No files were uploaded'); // Debug log
-        res.status(400).json({ message: "No files were uploaded" });
-        return;
+        return res.status(400).json({ message: "No files were uploaded" });
       }
 
       const image = req.files.image as UploadedFile;
       if (!image) {
         console.log('No image file found in request'); // Debug log
-        res.status(400).json({ message: "No image file found in request" });
-        return;
+        return res.status(400).json({ message: "No image file found in request" });
       }
 
       if (Array.isArray(image)) {
-        res.status(400).json({ message: "Please upload only one image" });
-        return;
+        return res.status(400).json({ message: "Please upload only one image" });
       }
 
       const title = req.body.title || '';
@@ -130,11 +124,23 @@ export async function registerRoutes(app: Express) {
         description: null,
         createdAt: new Date(),
       });
-      res.json(portfolioItem);
-    } catch (error) {
+      return res.json(portfolioItem);
+    } catch (error: any) {
       console.error('Error uploading portfolio image:', error);
-      res.status(500).json({ message: "Failed to upload image", error: error.message });
+      return res.status(500).json({ 
+        message: "Failed to upload image", 
+        error: error.message || 'Unknown error occurred'
+      });
     }
+  });
+
+  // Error handling middleware
+  app.use((err: any, _req: any, res: any, next: any) => {
+    console.error(err.stack);
+    res.status(500).json({
+      message: "An unexpected error occurred",
+      error: err.message || 'Unknown error'
+    });
   });
 
   app.post("/api/book", async (req, res) => {

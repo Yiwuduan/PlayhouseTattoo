@@ -48,8 +48,8 @@ export default function AdminPage() {
       });
 
       if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || 'Failed to upload image');
+        const errorData = await response.json().catch(() => ({ message: 'Failed to upload image' }));
+        throw new Error(errorData.message || 'Failed to upload image');
       }
 
       return response.json();
@@ -88,8 +88,8 @@ export default function AdminPage() {
       });
 
       if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || 'Failed to upload image');
+        const errorData = await response.json().catch(() => ({ message: 'Failed to upload image' }));
+        throw new Error(errorData.message || 'Failed to upload image');
       }
 
       return response.json();
