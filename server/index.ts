@@ -2,12 +2,22 @@ import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
 import { setupAuth } from "./auth";
+import fileUpload from "express-fileupload";
 
 const app = express();
 
 // Add JSON and URL-encoded middleware first
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
+
+// Add file upload middleware
+app.use(fileUpload({
+  createParentPath: true,
+  limits: {
+    fileSize: 5 * 1024 * 1024 // 5MB max file size
+  },
+  abortOnLimit: true
+}));
 
 // Setup authentication after body parsing middleware
 setupAuth(app);
