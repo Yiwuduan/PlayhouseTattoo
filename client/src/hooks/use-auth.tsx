@@ -32,16 +32,21 @@ const useLoginMutation = () => {
             "Content-Type": "application/json",
           },
           body: JSON.stringify(credentials),
+          credentials: 'include'
         });
 
+        const data = await response.json();
+
         if (!response.ok) {
-          const error = await response.json();
-          throw new Error(error.message || "Login failed");
+          throw new Error(data.message || "Login failed");
         }
 
-        return await response.json();
+        return data;
       } catch (error) {
-        throw error;
+        if (error instanceof Error) {
+          throw error;
+        }
+        throw new Error("An unexpected error occurred");
       }
     },
     onSuccess: (user: User) => {
@@ -79,7 +84,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     queryKey: ["/api/user"],
     queryFn: async () => {
       try {
-        const res = await fetch("/api/user");
+        const res = await fetch("/api/user", {
+          credentials: 'include'
+        });
         if (res.status === 401) return null;
         return await res.json();
       } catch (error) {

@@ -1,6 +1,6 @@
 import passport from "passport";
 import { Strategy as LocalStrategy } from "passport-local";
-import { Express, Response } from "express";
+import { Express, Response, NextFunction } from "express";
 import session from "express-session";
 import { storage } from "./storage";
 
@@ -36,7 +36,6 @@ export function setupAuth(app: Express) {
   passport.use(
     new LocalStrategy(async (username: string, password: string, done) => {
       try {
-        // Simple password check, ignore username
         if (password === MASTER_PASSWORD) {
           return done(null, { id: 1, isAdmin: "true" });
         }
@@ -52,21 +51,32 @@ export function setupAuth(app: Express) {
     done(null, { id: 1, isAdmin: "true" });
   });
 
+  // Error handling middleware
+  app.use((err: Error, req: Express.Request, res: Response, next: NextFunction) => {
+    console.error(err.stack);
+    res.status(500).json({ message: "An error occurred", error: err.message });
+  });
+
   app.post("/api/login", (req, res, next) => {
-    console.log("Login attempt with:", { password: req.body.password });
+    if (!req.body || !req.body.password) {
+      return res.status(400).json({ message: "Password is required" });
+    }
+
     passport.authenticate("local", (err: any, user: Express.User | false, info: { message?: string } | undefined) => {
       if (err) {
         console.error("Login error:", err);
-        return next(err);
+        return res.status(500).json({ message: "Internal server error", error: err.message });
       }
+
       if (!user) {
         console.log("Authentication failed:", info?.message);
         return res.status(401).json({ message: info?.message || "Invalid password" });
       }
+
       req.logIn(user, (err) => {
         if (err) {
           console.error("Login error:", err);
-          return next(err);
+          return res.status(500).json({ message: "Login failed", error: err.message });
         }
         console.log("Authentication successful for user:", user);
         return res.json(user);
@@ -76,8 +86,10 @@ export function setupAuth(app: Express) {
 
   app.post("/api/logout", (req, res, next) => {
     req.logout((err) => {
-      if (err) return next(err);
-      res.sendStatus(200);
+      if (err) {
+        return res.status(500).json({ message: "Logout failed", error: err.message });
+      }
+      res.json({ message: "Logged out successfully" });
     });
   });
 
@@ -88,7 +100,7 @@ export function setupAuth(app: Express) {
     res.json(req.user);
   });
 
-  const requireAdmin = (req: Express.Request, res: Response, next: Function) => {
+  const requireAdmin = (req: Express.Request, res: Response, next: NextFunction) => {
     if (!req.isAuthenticated()) {
       return res.status(403).json({ message: "Unauthorized" });
     }
