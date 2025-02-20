@@ -8,15 +8,18 @@ const app = express();
 
 // Add JSON and URL-encoded middleware first
 app.use(express.json());
-app.use(express.urlencoded({ extended: false }));
+app.use(express.urlencoded({ extended: true }));
 
-// Add file upload middleware
+// Add file upload middleware with proper configuration
 app.use(fileUpload({
   createParentPath: true,
   limits: {
     fileSize: 5 * 1024 * 1024 // 5MB max file size
   },
-  abortOnLimit: true
+  abortOnLimit: true,
+  useTempFiles: true,
+  tempFileDir: '/tmp/',
+  parseNested: true
 }));
 
 // Setup authentication after body parsing middleware
