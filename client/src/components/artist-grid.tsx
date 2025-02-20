@@ -19,21 +19,21 @@ export default function ArtistGrid({ artists }: ArtistGridProps) {
           <Link href={`/artists/${artist.slug}`}>
             <a className="group block">
               <div className="aspect-square overflow-hidden bg-muted">
-                {artist.portfolioItems[0] ? (
-                  <img
-                    src={artist.portfolioItems[0].imageUrl}
-                    alt={artist.portfolioItems[0].title || artist.name}
-                    className="object-cover w-full h-full transition-transform group-hover:scale-105"
-                  />
-                ) : artist.profileImage ? (
+                {artist.profileImage ? (
                   <img
                     src={artist.profileImage}
                     alt={artist.name}
                     className="object-cover w-full h-full transition-transform group-hover:scale-105"
                   />
+                ) : artist.portfolioItems[0] ? (
+                  <img
+                    src={artist.portfolioItems[0].imageUrl}
+                    alt={artist.portfolioItems[0].title || artist.name}
+                    className="object-cover w-full h-full transition-transform group-hover:scale-105"
+                  />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center text-muted-foreground">
-                    No portfolio images
+                    No image available
                   </div>
                 )}
               </div>
