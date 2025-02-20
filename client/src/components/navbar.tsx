@@ -15,7 +15,7 @@ export default function Navbar() {
   ];
 
   // If user is admin, add admin link to navigation
-  if (user?.isAdmin === true) {
+  if (user?.isAdmin === "true") {
     navItems.push({ href: "/admin", label: "Admin" });
   }
 
