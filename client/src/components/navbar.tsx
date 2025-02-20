@@ -1,8 +1,10 @@
 import { Link, useLocation } from "wouter";
 import { cn } from "@/lib/utils";
+import { useAuth } from "@/hooks/use-auth";
 
 export default function Navbar() {
   const [location] = useLocation();
+  const { user } = useAuth();
 
   const navItems = [
     { href: "/", label: "Home" },
@@ -17,7 +19,7 @@ export default function Navbar() {
         <Link href="/">
           <a className="text-2xl font-bold tracking-tight">PLAYHOUSE</a>
         </Link>
-        
+
         <div className="flex gap-6">
           {navItems.map(({ href, label }) => (
             <Link key={href} href={href}>
@@ -33,6 +35,20 @@ export default function Navbar() {
               </a>
             </Link>
           ))}
+          {user?.isAdmin === "true" && (
+            <Link href="/admin">
+              <a
+                className={cn(
+                  "text-sm font-medium transition-colors hover:text-primary",
+                  location === "/admin"
+                    ? "text-primary"
+                    : "text-muted-foreground"
+                )}
+              >
+                Admin
+              </a>
+            </Link>
+          )}
         </div>
       </div>
     </nav>
