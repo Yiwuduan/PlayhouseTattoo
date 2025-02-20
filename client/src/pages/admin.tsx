@@ -64,8 +64,13 @@ export default function AdminPage() {
       bio: string; 
       specialties: string[] 
     }) => {
-      if (!bio || !specialties || !Array.isArray(specialties)) {
-        throw new Error("Invalid input: Bio and specialties are required");
+      // Validate inputs before making the request
+      if (!bio || bio.trim().length === 0) {
+        throw new Error("Bio is required");
+      }
+
+      if (!specialties || !Array.isArray(specialties) || specialties.length === 0) {
+        throw new Error("At least one specialty is required");
       }
 
       setEditingArtist(artistId);
@@ -75,7 +80,7 @@ export default function AdminPage() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({ 
-          bio, 
+          bio: bio.trim(), 
           specialties: specialties.filter(s => s.trim().length > 0) 
         }),
       });
@@ -246,18 +251,43 @@ export default function AdminPage() {
                     <Button
                       onClick={() => {
                         const state = artistStates[artist.id];
-                        if (state) {
-                          const specialtiesArray = state.specialties
-                            .split(",")
-                            .map(s => s.trim())
-                            .filter(s => s.length > 0);
-
-                          updateArtistDetailsMutation.mutate({
-                            artistId: artist.id,
-                            bio: state.bio,
-                            specialties: specialtiesArray
+                        if (!state) {
+                          toast({
+                            title: "Error",
+                            description: "No changes to save",
+                            variant: "destructive",
                           });
+                          return;
                         }
+
+                        if (!state.bio || state.bio.trim().length === 0) {
+                          toast({
+                            title: "Error",
+                            description: "Bio is required",
+                            variant: "destructive",
+                          });
+                          return;
+                        }
+
+                        const specialtiesArray = state.specialties
+                          .split(",")
+                          .map(s => s.trim())
+                          .filter(s => s.length > 0);
+
+                        if (specialtiesArray.length === 0) {
+                          toast({
+                            title: "Error",
+                            description: "At least one specialty is required",
+                            variant: "destructive",
+                          });
+                          return;
+                        }
+
+                        updateArtistDetailsMutation.mutate({
+                          artistId: artist.id,
+                          bio: state.bio,
+                          specialties: specialtiesArray
+                        });
                       }}
                       disabled={editingArtist === artist.id}
                     >
