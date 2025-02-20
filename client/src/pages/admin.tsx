@@ -21,6 +21,7 @@ export default function AdminPage() {
   const [uploadingProfile, setUploadingProfile] = useState<number | null>(null);
   const [uploadingPortfolio, setUploadingPortfolio] = useState<number | null>(null);
   const [editingArtist, setEditingArtist] = useState<number | null>(null);
+  const [artistStates, setArtistStates] = useState<Record<number, { bio: string; specialties: string }>>({});
 
   // Redirect if not admin
   useEffect(() => {
@@ -35,7 +36,22 @@ export default function AdminPage() {
   }, [user, setLocation, toast]);
 
   const { data: artists, isLoading } = useQuery<(Artist & { portfolioItems: PortfolioItem[] })[]>({
-    queryKey: ['/api/artists']
+    queryKey: ['/api/artists'],
+    onSuccess: (data) => {
+      // Initialize artist states if not already set
+      const newStates: Record<number, { bio: string; specialties: string }> = {};
+      data.forEach((artist) => {
+        if (!artistStates[artist.id]) {
+          newStates[artist.id] = {
+            bio: artist.bio,
+            specialties: artist.specialties.join(", ")
+          };
+        }
+      });
+      if (Object.keys(newStates).length > 0) {
+        setArtistStates(prev => ({ ...prev, ...newStates }));
+      }
+    }
   });
 
   const updateArtistDetailsMutation = useMutation({
@@ -181,136 +197,140 @@ export default function AdminPage() {
       >
         <h1 className="text-4xl font-bold">Artist Management</h1>
 
-        {artists?.map((artist) => {
-          const [bio, setBio] = useState(artist.bio);
-          const [specialties, setSpecialties] = useState(artist.specialties.join(", "));
+        {artists?.map((artist) => (
+          <Card key={artist.id}>
+            <CardHeader>
+              <CardTitle>{artist.name}</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <Tabs defaultValue="details">
+                <TabsList>
+                  <TabsTrigger value="details">Details</TabsTrigger>
+                  <TabsTrigger value="profile">Profile Image</TabsTrigger>
+                  <TabsTrigger value="portfolio">Portfolio</TabsTrigger>
+                </TabsList>
 
-          return (
-            <Card key={artist.id}>
-              <CardHeader>
-                <CardTitle>{artist.name}</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <Tabs defaultValue="details">
-                  <TabsList>
-                    <TabsTrigger value="details">Details</TabsTrigger>
-                    <TabsTrigger value="profile">Profile Image</TabsTrigger>
-                    <TabsTrigger value="portfolio">Portfolio</TabsTrigger>
-                  </TabsList>
-
-                  <TabsContent value="details" className="space-y-4">
-                    <div className="grid w-full max-w-xl gap-4">
-                      <div className="space-y-2">
-                        <Label htmlFor={`bio-${artist.id}`}>Bio</Label>
-                        <Textarea
-                          id={`bio-${artist.id}`}
-                          value={bio}
-                          onChange={(e) => setBio(e.target.value)}
-                          rows={4}
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <Label htmlFor={`specialties-${artist.id}`}>Specialties (comma-separated)</Label>
-                        <Input
-                          id={`specialties-${artist.id}`}
-                          value={specialties}
-                          onChange={(e) => setSpecialties(e.target.value)}
-                          placeholder="e.g. Fine Line, Botanicals, Minimalist"
-                        />
-                      </div>
-                      <Button
-                        onClick={() => {
+                <TabsContent value="details" className="space-y-4">
+                  <div className="grid w-full max-w-xl gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor={`bio-${artist.id}`}>Bio</Label>
+                      <Textarea
+                        id={`bio-${artist.id}`}
+                        value={artistStates[artist.id]?.bio ?? artist.bio}
+                        onChange={(e) => setArtistStates(prev => ({
+                          ...prev,
+                          [artist.id]: { ...prev[artist.id], bio: e.target.value }
+                        }))}
+                        rows={4}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor={`specialties-${artist.id}`}>Specialties (comma-separated)</Label>
+                      <Input
+                        id={`specialties-${artist.id}`}
+                        value={artistStates[artist.id]?.specialties ?? artist.specialties.join(", ")}
+                        onChange={(e) => setArtistStates(prev => ({
+                          ...prev,
+                          [artist.id]: { ...prev[artist.id], specialties: e.target.value }
+                        }))}
+                        placeholder="e.g. Fine Line, Botanicals, Minimalist"
+                      />
+                    </div>
+                    <Button
+                      onClick={() => {
+                        const state = artistStates[artist.id];
+                        if (state) {
                           updateArtistDetailsMutation.mutate({
                             artistId: artist.id,
-                            bio,
-                            specialties: specialties.split(",").map(s => s.trim()).filter(Boolean)
+                            bio: state.bio,
+                            specialties: state.specialties.split(",").map(s => s.trim()).filter(Boolean)
                           });
+                        }
+                      }}
+                      disabled={editingArtist === artist.id}
+                    >
+                      {editingArtist === artist.id ? (
+                        <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                      ) : (
+                        <Save className="h-4 w-4 mr-2" />
+                      )}
+                      Save Changes
+                    </Button>
+                  </div>
+                </TabsContent>
+
+                <TabsContent value="profile" className="space-y-4">
+                  <div className="grid w-full max-w-sm items-center gap-1.5">
+                    <Label htmlFor={`profile-${artist.id}`}>Profile Image</Label>
+                    <div className="flex items-center gap-4">
+                      <Input
+                        id={`profile-${artist.id}`}
+                        type="file"
+                        accept="image/*"
+                        disabled={uploadingProfile === artist.id}
+                        onChange={(e) => {
+                          const file = e.target.files?.[0];
+                          if (file) {
+                            updateProfileImageMutation.mutate({ artistId: artist.id, file });
+                          }
                         }}
-                        disabled={editingArtist === artist.id}
-                      >
-                        {editingArtist === artist.id ? (
-                          <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                        ) : (
-                          <Save className="h-4 w-4 mr-2" />
-                        )}
-                        Save Changes
-                      </Button>
-                    </div>
-                  </TabsContent>
-
-                  <TabsContent value="profile" className="space-y-4">
-                    <div className="grid w-full max-w-sm items-center gap-1.5">
-                      <Label htmlFor={`profile-${artist.id}`}>Profile Image</Label>
-                      <div className="flex items-center gap-4">
-                        <Input
-                          id={`profile-${artist.id}`}
-                          type="file"
-                          accept="image/*"
-                          disabled={uploadingProfile === artist.id}
-                          onChange={(e) => {
-                            const file = e.target.files?.[0];
-                            if (file) {
-                              updateProfileImageMutation.mutate({ artistId: artist.id, file });
-                            }
-                          }}
-                        />
-                        {uploadingProfile === artist.id && (
-                          <Loader2 className="h-4 w-4 animate-spin" />
-                        )}
-                      </div>
-                    </div>
-                    {artist.profileImage && (
-                      <img
-                        src={`${artist.profileImage}?${Date.now()}`}
-                        alt={`${artist.name}'s profile`}
-                        className="w-32 h-32 object-cover rounded-lg"
                       />
-                    )}
-                  </TabsContent>
+                      {uploadingProfile === artist.id && (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      )}
+                    </div>
+                  </div>
+                  {artist.profileImage && (
+                    <img
+                      src={`${artist.profileImage}?${Date.now()}`}
+                      alt={`${artist.name}'s profile`}
+                      className="w-32 h-32 object-cover rounded-lg"
+                    />
+                  )}
+                </TabsContent>
 
-                  <TabsContent value="portfolio" className="space-y-4">
-                    <div className="grid w-full max-w-sm items-center gap-1.5">
-                      <Label htmlFor={`portfolio-${artist.id}`}>Add Portfolio Item</Label>
-                      <div className="flex items-center gap-4">
-                        <Input
-                          id={`portfolio-${artist.id}`}
-                          type="file"
-                          accept="image/*"
-                          disabled={uploadingPortfolio === artist.id}
-                          onChange={(e) => {
-                            const file = e.target.files?.[0];
-                            if (file) {
-                              const title = file.name.split('.')[0];
-                              addPortfolioItemMutation.mutate({ 
-                                artistId: artist.id, 
-                                file,
-                                title 
-                              });
-                            }
-                          }}
+                <TabsContent value="portfolio" className="space-y-4">
+                  <div className="grid w-full max-w-sm items-center gap-1.5">
+                    <Label htmlFor={`portfolio-${artist.id}`}>Add Portfolio Item</Label>
+                    <div className="flex items-center gap-4">
+                      <Input
+                        id={`portfolio-${artist.id}`}
+                        type="file"
+                        accept="image/*"
+                        disabled={uploadingPortfolio === artist.id}
+                        onChange={(e) => {
+                          const file = e.target.files?.[0];
+                          if (file) {
+                            const title = file.name.split('.')[0];
+                            addPortfolioItemMutation.mutate({ 
+                              artistId: artist.id, 
+                              file,
+                              title 
+                            });
+                          }
+                        }}
+                      />
+                      {uploadingPortfolio === artist.id && (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      )}
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-3 gap-4">
+                    {artist.portfolioItems.map((item) => (
+                      <div key={item.id} className="relative">
+                        <img
+                          src={`${item.imageUrl}?${Date.now()}`}
+                          alt={item.title || "Portfolio item"}
+                          className="w-full aspect-square object-cover rounded-lg"
                         />
-                        {uploadingPortfolio === artist.id && (
-                          <Loader2 className="h-4 w-4 animate-spin" />
-                        )}
                       </div>
-                    </div>
-                    <div className="grid grid-cols-3 gap-4">
-                      {artist.portfolioItems.map((item) => (
-                        <div key={item.id} className="relative">
-                          <img
-                            src={`${item.imageUrl}?${Date.now()}`}
-                            alt={item.title || "Portfolio item"}
-                            className="w-full aspect-square object-cover rounded-lg"
-                          />
-                        </div>
-                      ))}
-                    </div>
-                  </TabsContent>
-                </Tabs>
-              </CardContent>
-            </Card>
-          );
-        })}
+                    ))}
+                  </div>
+                </TabsContent>
+              </Tabs>
+            </CardContent>
+          </Card>
+        ))}
       </motion.div>
     </div>
   );
