@@ -9,7 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Loader2, Upload } from "lucide-react";
-import { apiRequest, queryClient } from "@/lib/queryClient";
+import { queryClient } from "@/lib/queryClient";
 import { useEffect, useState } from "react";
 import { useLocation } from "wouter";
 
@@ -41,10 +41,20 @@ export default function AdminPage() {
       setUploadingProfile(artistId);
       const formData = new FormData();
       formData.append("image", file);
-      await apiRequest("POST", `/api/artists/${artistId}/profile-image`, formData);
+
+      const response = await fetch(`/api/artists/${artistId}/profile-image`, {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || 'Failed to upload image');
+      }
+
+      return response.json();
     },
     onSuccess: () => {
-      // Invalidate all artist-related queries
       queryClient.invalidateQueries({ queryKey: ['/api/artists'] });
       queryClient.invalidateQueries({ 
         predicate: (query) => query.queryKey[0].toString().startsWith('/api/artists/') 
@@ -55,10 +65,10 @@ export default function AdminPage() {
       });
       setUploadingProfile(null);
     },
-    onError: () => {
+    onError: (error: Error) => {
       toast({
         title: "Error",
-        description: "Failed to update profile image",
+        description: error.message || "Failed to update profile image",
         variant: "destructive",
       });
       setUploadingProfile(null);
@@ -71,10 +81,20 @@ export default function AdminPage() {
       const formData = new FormData();
       formData.append("image", file);
       formData.append("title", title);
-      await apiRequest("POST", `/api/artists/${artistId}/portfolio`, formData);
+
+      const response = await fetch(`/api/artists/${artistId}/portfolio`, {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || 'Failed to upload image');
+      }
+
+      return response.json();
     },
     onSuccess: () => {
-      // Invalidate all artist-related queries
       queryClient.invalidateQueries({ queryKey: ['/api/artists'] });
       queryClient.invalidateQueries({ 
         predicate: (query) => query.queryKey[0].toString().startsWith('/api/artists/') 
@@ -85,10 +105,10 @@ export default function AdminPage() {
       });
       setUploadingPortfolio(null);
     },
-    onError: () => {
+    onError: (error: Error) => {
       toast({
         title: "Error",
-        description: "Failed to add portfolio item",
+        description: error.message || "Failed to add portfolio item",
         variant: "destructive",
       });
       setUploadingPortfolio(null);

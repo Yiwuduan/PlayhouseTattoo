@@ -21,10 +21,16 @@ export async function registerRoutes(app: Express) {
   // Configure express-fileupload middleware
   app.use(fileUpload({
     createParentPath: true,
-    limits: { fileSize: 50 * 1024 * 1024 }, // 50MB max file size
+    limits: { 
+      fileSize: 50 * 1024 * 1024, // 50MB max file size
+      files: 1 // Allow only 1 file per request
+    },
+    abortOnLimit: true,
     useTempFiles: true,
     tempFileDir: '/tmp/',
-    debug: true, // Enable debugging
+    debug: true,
+    safeFileNames: true,
+    preserveExtension: true
   }));
 
   // Serve uploaded files statically
@@ -48,6 +54,7 @@ export async function registerRoutes(app: Express) {
     try {
       const artistId = parseInt(req.params.id);
       console.log('Files received:', req.files); // Debug log
+      console.log('Request headers:', req.headers); // Debug log
 
       if (!req.files || Object.keys(req.files).length === 0) {
         console.log('No files were uploaded'); // Debug log
@@ -76,9 +83,12 @@ export async function registerRoutes(app: Express) {
 
       await storage.updateArtistProfileImage(artistId, imageUrl);
       res.json({ imageUrl });
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error uploading profile image:', error);
-      res.status(500).json({ message: "Failed to upload image", error: error.message });
+      res.status(500).json({ 
+        message: "Failed to upload image", 
+        error: error.message || 'Unknown error occurred'
+      });
     }
   });
 
