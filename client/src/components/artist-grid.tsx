@@ -21,13 +21,13 @@ export default function ArtistGrid({ artists }: ArtistGridProps) {
               <div className="aspect-square overflow-hidden bg-muted">
                 {artist.profileImage ? (
                   <img
-                    src={artist.profileImage}
+                    src={`${artist.profileImage}?${Date.now()}`}
                     alt={artist.name}
                     className="object-cover w-full h-full transition-transform group-hover:scale-105"
                   />
                 ) : artist.portfolioItems[0] ? (
                   <img
-                    src={artist.portfolioItems[0].imageUrl}
+                    src={`${artist.portfolioItems[0].imageUrl}?${Date.now()}`}
                     alt={artist.portfolioItems[0].title || artist.name}
                     className="object-cover w-full h-full transition-transform group-hover:scale-105"
                   />

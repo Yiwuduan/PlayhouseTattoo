@@ -9,7 +9,8 @@ import { CalendarIcon } from "lucide-react";
 export default function Artist() {
   const { slug } = useParams();
   const { data: artist, isLoading } = useQuery<Artist & { portfolioItems: PortfolioItem[] }>({
-    queryKey: [`/api/artists/${slug}`]
+    queryKey: [`/api/artists/${slug}`],
+    refetchInterval: 5000, // Refetch every 5 seconds to ensure fresh data
   });
 
   if (isLoading) {
@@ -83,7 +84,7 @@ export default function Artist() {
             className="aspect-square bg-muted overflow-hidden"
           >
             <img
-              src={item.imageUrl}
+              src={`${item.imageUrl}?${Date.now()}`}
               alt={item.title || `${artist.name}'s work ${index + 1}`}
               className="w-full h-full object-cover hover:scale-105 transition-transform"
             />

@@ -4,7 +4,8 @@ import type { Artist, PortfolioItem } from "@shared/schema";
 
 export default function PortfolioGallery() {
   const { data: artists } = useQuery<(Artist & { portfolioItems: PortfolioItem[] })[]>({
-    queryKey: ['/api/artists']
+    queryKey: ['/api/artists'],
+    refetchInterval: 5000, // Refetch every 5 seconds to ensure fresh data
   });
 
   // Combine all portfolio images into a single array of portfolio items
@@ -36,7 +37,7 @@ export default function PortfolioGallery() {
             transition={{ duration: 0.2 }}
           >
             <img
-              src={item.imageUrl}
+              src={`${item.imageUrl}?${Date.now()}`}
               alt={item.title || `Portfolio piece ${i + 1}`}
               className="w-full h-full object-cover"
             />
