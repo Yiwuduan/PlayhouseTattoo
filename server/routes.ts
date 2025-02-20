@@ -71,11 +71,29 @@ export async function registerRoutes(app: Express) {
         return res.status(400).json({ message: "Please upload only one image" });
       }
 
+      // Validate file type
+      if (!image.mimetype.startsWith('image/')) {
+        return res.status(400).json({ message: "Please upload only image files" });
+      }
+
       const fileName = `profile-${artistId}-${Date.now()}${path.extname(image.name)}`;
       const filePath = path.join(uploadsDir, fileName);
 
       console.log('Moving file to:', filePath); // Debug log
-      await image.mv(filePath);
+      try {
+        await fs.promises.access(uploadsDir, fs.constants.W_OK);
+      } catch (err) {
+        console.error('Upload directory not writable:', err);
+        return res.status(500).json({ message: "Server configuration error" });
+      }
+
+      try {
+        await image.mv(filePath);
+      } catch (err) {
+        console.error('Error moving file:', err);
+        return res.status(500).json({ message: "Failed to save image file" });
+      }
+
       const imageUrl = `/uploads/${fileName}`;
 
       await storage.updateArtistProfileImage(artistId, imageUrl);
@@ -109,12 +127,30 @@ export async function registerRoutes(app: Express) {
         return res.status(400).json({ message: "Please upload only one image" });
       }
 
+      // Validate file type
+      if (!image.mimetype.startsWith('image/')) {
+        return res.status(400).json({ message: "Please upload only image files" });
+      }
+
       const title = req.body.title || '';
       const fileName = `portfolio-${artistId}-${Date.now()}${path.extname(image.name)}`;
       const filePath = path.join(uploadsDir, fileName);
 
       console.log('Moving file to:', filePath); // Debug log
-      await image.mv(filePath);
+      try {
+        await fs.promises.access(uploadsDir, fs.constants.W_OK);
+      } catch (err) {
+        console.error('Upload directory not writable:', err);
+        return res.status(500).json({ message: "Server configuration error" });
+      }
+
+      try {
+        await image.mv(filePath);
+      } catch (err) {
+        console.error('Error moving file:', err);
+        return res.status(500).json({ message: "Failed to save image file" });
+      }
+
       const imageUrl = `/uploads/${fileName}`;
 
       const portfolioItem = await storage.addPortfolioItem({
