@@ -1,10 +1,11 @@
 import { Link, useLocation } from "wouter";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/hooks/use-auth";
+import { Button } from "@/components/ui/button";
 
 export default function Navbar() {
   const [location] = useLocation();
-  const { user } = useAuth();
+  const { user, logoutMutation } = useAuth();
 
   const navItems = [
     { href: "/", label: "Home" },
@@ -13,6 +14,11 @@ export default function Navbar() {
     { href: "/book", label: "Book" }
   ];
 
+  // If user is admin, add admin link to navigation
+  if (user?.isAdmin === true) {
+    navItems.push({ href: "/admin", label: "Admin" });
+  }
+
   return (
     <nav className="fixed top-0 w-full bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 z-50 border-b border-border">
       <div className="container flex h-16 items-center justify-between px-4">
@@ -20,7 +26,7 @@ export default function Navbar() {
           <a className="text-2xl font-bold tracking-tight">PLAYHOUSE</a>
         </Link>
 
-        <div className="flex gap-6">
+        <div className="flex items-center gap-6">
           {navItems.map(({ href, label }) => (
             <Link key={href} href={href}>
               <a
@@ -35,17 +41,18 @@ export default function Navbar() {
               </a>
             </Link>
           ))}
-          {user?.isAdmin === "true" && (
-            <Link href="/admin">
-              <a
-                className={cn(
-                  "text-sm font-medium transition-colors hover:text-primary",
-                  location === "/admin"
-                    ? "text-primary"
-                    : "text-muted-foreground"
-                )}
-              >
-                Admin
+          {user ? (
+            <Button
+              variant="ghost"
+              onClick={() => logoutMutation.mutate()}
+              className="text-sm font-medium"
+            >
+              Logout
+            </Button>
+          ) : (
+            <Link href="/auth">
+              <a className="text-sm font-medium text-muted-foreground hover:text-primary">
+                Login
               </a>
             </Link>
           )}
