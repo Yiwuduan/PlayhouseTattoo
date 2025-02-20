@@ -12,6 +12,7 @@ import Artist from "@/pages/artist";
 import About from "@/pages/about";
 import Book from "@/pages/book";
 import Admin from "@/pages/admin";
+import Auth from "@/pages/auth";
 import NotFound from "@/pages/not-found";
 import Chatbot from "@/components/chatbot";
 
@@ -26,6 +27,7 @@ function Router() {
           <Route path="/artists/:slug" component={Artist} />
           <Route path="/about" component={About} />
           <Route path="/book" component={Book} />
+          <Route path="/auth" component={Auth} />
           <ProtectedRoute path="/admin" component={Admin} adminOnly />
           <Route component={NotFound} />
         </Switch>
