@@ -150,14 +150,33 @@ export async function registerRoutes(app: Express) {
       const artistId = parseInt(req.params.id);
       const { bio, specialties } = req.body;
 
-      // Validate that at least one field is present
-      if (typeof bio !== 'string' || !Array.isArray(specialties)) {
-        return res.status(400).json({ message: "Invalid request data. Bio must be a string and specialties must be an array." });
+      // Enhanced validation
+      if (typeof bio !== 'string' || bio.trim().length === 0) {
+        return res.status(400).json({ 
+          message: "Invalid request data. Bio must be a non-empty string." 
+        });
+      }
+
+      if (!Array.isArray(specialties) || specialties.some(s => typeof s !== 'string')) {
+        return res.status(400).json({ 
+          message: "Invalid request data. Specialties must be an array of strings." 
+        });
+      }
+
+      // Filter out empty strings and trim values
+      const cleanedSpecialties = specialties
+        .map(s => s.trim())
+        .filter(s => s.length > 0);
+
+      if (cleanedSpecialties.length === 0) {
+        return res.status(400).json({ 
+          message: "Invalid request data. At least one specialty is required." 
+        });
       }
 
       const updatedArtist = await storage.updateArtist(artistId, {
-        bio,
-        specialties
+        bio: bio.trim(),
+        specialties: cleanedSpecialties
       });
 
       if (!updatedArtist) {

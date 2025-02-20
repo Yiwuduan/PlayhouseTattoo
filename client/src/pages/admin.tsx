@@ -64,13 +64,20 @@ export default function AdminPage() {
       bio: string; 
       specialties: string[] 
     }) => {
+      if (!bio || !specialties || !Array.isArray(specialties)) {
+        throw new Error("Invalid input: Bio and specialties are required");
+      }
+
       setEditingArtist(artistId);
       const response = await fetch(`/api/artists/${artistId}`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ bio, specialties }),
+        body: JSON.stringify({ 
+          bio, 
+          specialties: specialties.filter(s => s.trim().length > 0) 
+        }),
       });
 
       if (!response.ok) {
@@ -240,10 +247,15 @@ export default function AdminPage() {
                       onClick={() => {
                         const state = artistStates[artist.id];
                         if (state) {
+                          const specialtiesArray = state.specialties
+                            .split(",")
+                            .map(s => s.trim())
+                            .filter(s => s.length > 0);
+
                           updateArtistDetailsMutation.mutate({
                             artistId: artist.id,
                             bio: state.bio,
-                            specialties: state.specialties.split(",").map(s => s.trim()).filter(Boolean)
+                            specialties: specialtiesArray
                           });
                         }
                       }}
