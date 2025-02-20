@@ -29,17 +29,17 @@ export function setupAuth(app: Express) {
   app.use(passport.session());
 
   passport.use(
-    new LocalStrategy(async (username, password, done) => {
-      // Simple password check
+    new LocalStrategy((username, password, done) => {
+      // Simple password check, ignore username
       if (password === MASTER_PASSWORD) {
         return done(null, { id: 1, isAdmin: "true" });
       }
       return done(null, false);
-    }),
+    })
   );
 
   passport.serializeUser((user, done) => done(null, user.id));
-  passport.deserializeUser(async (id: number, done) => {
+  passport.deserializeUser((id: number, done) => {
     done(null, { id: 1, isAdmin: "true" });
   });
 
