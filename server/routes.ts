@@ -1,4 +1,4 @@
-import type { Express } from "express";
+import type { Express, Request } from "express";
 import { createServer } from "http";
 import { storage } from "./storage";
 import { insertBookingSchema } from "@shared/schema";
@@ -7,6 +7,7 @@ import express from "express";
 import path from "path";
 import fs from "fs";
 import fileUpload from "express-fileupload";
+import type { UploadedFile } from "express-fileupload";
 
 // Ensure uploads directory exists
 const uploadsDir = path.join(process.cwd(), 'uploads');
@@ -21,6 +22,9 @@ export async function registerRoutes(app: Express) {
   app.use(fileUpload({
     createParentPath: true,
     limits: { fileSize: 50 * 1024 * 1024 }, // 50MB max file size
+    useTempFiles: true,
+    tempFileDir: '/tmp/',
+    debug: true, // Enable debugging
   }));
 
   // Serve uploaded files statically
@@ -43,12 +47,21 @@ export async function registerRoutes(app: Express) {
   app.post("/api/artists/:id/profile-image", async (req, res) => {
     try {
       const artistId = parseInt(req.params.id);
-      if (!req.files || !req.files.image) {
-        res.status(400).json({ message: "No image file uploaded" });
+      console.log('Files received:', req.files); // Debug log
+
+      if (!req.files || Object.keys(req.files).length === 0) {
+        console.log('No files were uploaded'); // Debug log
+        res.status(400).json({ message: "No files were uploaded" });
         return;
       }
 
-      const image = req.files.image;
+      const image = req.files.image as UploadedFile;
+      if (!image) {
+        console.log('No image file found in request'); // Debug log
+        res.status(400).json({ message: "No image file found in request" });
+        return;
+      }
+
       if (Array.isArray(image)) {
         res.status(400).json({ message: "Please upload only one image" });
         return;
@@ -57,6 +70,7 @@ export async function registerRoutes(app: Express) {
       const fileName = `profile-${artistId}-${Date.now()}${path.extname(image.name)}`;
       const filePath = path.join(uploadsDir, fileName);
 
+      console.log('Moving file to:', filePath); // Debug log
       await image.mv(filePath);
       const imageUrl = `/uploads/${fileName}`;
 
@@ -64,19 +78,28 @@ export async function registerRoutes(app: Express) {
       res.json({ imageUrl });
     } catch (error) {
       console.error('Error uploading profile image:', error);
-      res.status(500).json({ message: "Failed to upload image" });
+      res.status(500).json({ message: "Failed to upload image", error: error.message });
     }
   });
 
   app.post("/api/artists/:id/portfolio", async (req, res) => {
     try {
       const artistId = parseInt(req.params.id);
-      if (!req.files || !req.files.image) {
-        res.status(400).json({ message: "No image file uploaded" });
+      console.log('Files received:', req.files); // Debug log
+
+      if (!req.files || Object.keys(req.files).length === 0) {
+        console.log('No files were uploaded'); // Debug log
+        res.status(400).json({ message: "No files were uploaded" });
         return;
       }
 
-      const image = req.files.image;
+      const image = req.files.image as UploadedFile;
+      if (!image) {
+        console.log('No image file found in request'); // Debug log
+        res.status(400).json({ message: "No image file found in request" });
+        return;
+      }
+
       if (Array.isArray(image)) {
         res.status(400).json({ message: "Please upload only one image" });
         return;
@@ -86,6 +109,7 @@ export async function registerRoutes(app: Express) {
       const fileName = `portfolio-${artistId}-${Date.now()}${path.extname(image.name)}`;
       const filePath = path.join(uploadsDir, fileName);
 
+      console.log('Moving file to:', filePath); // Debug log
       await image.mv(filePath);
       const imageUrl = `/uploads/${fileName}`;
 
@@ -99,7 +123,7 @@ export async function registerRoutes(app: Express) {
       res.json(portfolioItem);
     } catch (error) {
       console.error('Error uploading portfolio image:', error);
-      res.status(500).json({ message: "Failed to upload image" });
+      res.status(500).json({ message: "Failed to upload image", error: error.message });
     }
   });
 
