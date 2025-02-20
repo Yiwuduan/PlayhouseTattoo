@@ -22,12 +22,6 @@ export default function AuthPage() {
   const [, setLocation] = useLocation();
   const [showPassword, setShowPassword] = useState(false);
 
-  // Redirect if already logged in
-  if (user) {
-    setLocation("/");
-    return null;
-  }
-
   const form = useForm<LoginValues>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
@@ -35,6 +29,19 @@ export default function AuthPage() {
       password: "",
     },
   });
+
+  // Handle form submission
+  const onSubmit = (data: LoginValues) => {
+    console.log("Submitting with data:", data);
+    loginMutation.mutate(data);
+  };
+
+  // If user is logged in, redirect to home
+  if (user) {
+    // Use setTimeout to ensure state updates are handled properly
+    setTimeout(() => setLocation("/"), 0);
+    return null;
+  }
 
   return (
     <div className="container flex items-center justify-center min-h-screen">
@@ -45,10 +52,7 @@ export default function AuthPage() {
         <CardContent>
           <Form {...form}>
             <form
-              onSubmit={form.handleSubmit((data) => {
-                console.log("Submitting with data:", data);
-                loginMutation.mutate(data);
-              })}
+              onSubmit={form.handleSubmit(onSubmit)}
               className="space-y-4"
             >
               <FormField
