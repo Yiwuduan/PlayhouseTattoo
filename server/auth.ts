@@ -1,6 +1,6 @@
 import passport from "passport";
 import { Strategy as LocalStrategy } from "passport-local";
-import { Express } from "express";
+import { Express, Response } from "express";
 import session from "express-session";
 import { storage } from "./storage";
 
@@ -17,7 +17,7 @@ const MASTER_PASSWORD = process.env.MASTER_PASSWORD || "tattoo2024";
 
 export function setupAuth(app: Express) {
   const sessionSettings: session.SessionOptions = {
-    secret: process.env.SESSION_SECRET!,
+    secret: process.env.SESSION_SECRET || "tattoo-session-secret",
     resave: false,
     saveUninitialized: false,
     store: storage.sessionStore,
@@ -34,7 +34,7 @@ export function setupAuth(app: Express) {
       if (password === MASTER_PASSWORD) {
         return done(null, { id: 1, isAdmin: "true" });
       }
-      return done(null, false);
+      return done(null, false, { message: "Invalid password" });
     })
   );
 
@@ -43,8 +43,21 @@ export function setupAuth(app: Express) {
     done(null, { id: 1, isAdmin: "true" });
   });
 
-  app.post("/api/login", passport.authenticate("local"), (req, res) => {
-    res.status(200).json(req.user);
+  app.post("/api/login", (req, res, next) => {
+    passport.authenticate("local", (err, user, info) => {
+      if (err) {
+        return next(err);
+      }
+      if (!user) {
+        return res.status(401).json({ message: info?.message || "Invalid password" });
+      }
+      req.logIn(user, (err) => {
+        if (err) {
+          return next(err);
+        }
+        return res.json(user);
+      });
+    })(req, res, next);
   });
 
   app.post("/api/logout", (req, res, next) => {
@@ -55,14 +68,14 @@ export function setupAuth(app: Express) {
   });
 
   app.get("/api/user", (req, res) => {
-    if (!req.isAuthenticated()) return res.sendStatus(401);
+    if (!req.isAuthenticated()) return res.status(401).json({ message: "Not authenticated" });
     res.json(req.user);
   });
 
   // Admin middleware
-  const requireAdmin = (req: Express.Request, res: Express.Response, next: Function) => {
+  const requireAdmin = (req: Express.Request, res: Response, next: Function) => {
     if (!req.isAuthenticated()) {
-      return res.status(403).send("Unauthorized");
+      return res.status(403).json({ message: "Unauthorized" });
     }
     next();
   };
