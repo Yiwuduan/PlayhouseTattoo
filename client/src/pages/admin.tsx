@@ -36,23 +36,22 @@ export default function AdminPage() {
   }, [user, setLocation, toast]);
 
   const { data: artists, isLoading } = useQuery<(Artist & { portfolioItems: PortfolioItem[] })[]>({
-    queryKey: ['/api/artists'],
-    onSuccess: (data) => {
-      // Initialize artist states if not already set
-      const newStates: Record<number, { bio: string; specialties: string }> = {};
-      data.forEach((artist) => {
-        if (!artistStates[artist.id]) {
-          newStates[artist.id] = {
-            bio: artist.bio,
-            specialties: artist.specialties.join(", ")
-          };
-        }
-      });
-      if (Object.keys(newStates).length > 0) {
-        setArtistStates(prev => ({ ...prev, ...newStates }));
-      }
-    }
+    queryKey: ['/api/artists']
   });
+
+  // Initialize artist states when data is loaded
+  useEffect(() => {
+    if (artists) {
+      const newStates: Record<number, { bio: string; specialties: string }> = {};
+      artists.forEach((artist) => {
+        newStates[artist.id] = {
+          bio: artist.bio,
+          specialties: artist.specialties.join(", ")
+        };
+      });
+      setArtistStates(newStates);
+    }
+  }, [artists]);
 
   const updateArtistDetailsMutation = useMutation({
     mutationFn: async ({ 
@@ -64,12 +63,17 @@ export default function AdminPage() {
       bio: string; 
       specialties: string[] 
     }) => {
-      // Validate inputs before making the request
-      if (!bio || bio.trim().length === 0) {
+      const currentState = artistStates[artistId];
+      if (!currentState) {
+        throw new Error("Artist state not found");
+      }
+
+      const bioToSend = bio.trim();
+      if (bioToSend.length === 0) {
         throw new Error("Bio is required");
       }
 
-      if (!specialties || !Array.isArray(specialties) || specialties.length === 0) {
+      if (!specialties || specialties.length === 0) {
         throw new Error("At least one specialty is required");
       }
 
@@ -80,8 +84,8 @@ export default function AdminPage() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({ 
-          bio: bio.trim(), 
-          specialties: specialties.filter(s => s.trim().length > 0) 
+          bio: bioToSend,
+          specialties: specialties.filter(s => s.trim().length > 0)
         }),
       });
 
@@ -252,18 +256,10 @@ export default function AdminPage() {
                       onClick={() => {
                         const state = artistStates[artist.id];
                         if (!state) {
+                          console.error('No state found for artist:', artist.id);
                           toast({
                             title: "Error",
-                            description: "No changes to save",
-                            variant: "destructive",
-                          });
-                          return;
-                        }
-
-                        if (!state.bio || state.bio.trim().length === 0) {
-                          toast({
-                            title: "Error",
-                            description: "Bio is required",
+                            description: "Unable to save changes. Please refresh the page and try again.",
                             variant: "destructive",
                           });
                           return;
@@ -274,15 +270,6 @@ export default function AdminPage() {
                           .map(s => s.trim())
                           .filter(s => s.length > 0);
 
-                        if (specialtiesArray.length === 0) {
-                          toast({
-                            title: "Error",
-                            description: "At least one specialty is required",
-                            variant: "destructive",
-                          });
-                          return;
-                        }
-
                         updateArtistDetailsMutation.mutate({
                           artistId: artist.id,
                           bio: state.bio,
@@ -292,11 +279,16 @@ export default function AdminPage() {
                       disabled={editingArtist === artist.id}
                     >
                       {editingArtist === artist.id ? (
-                        <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                        <>
+                          <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                          Saving...
+                        </>
                       ) : (
-                        <Save className="h-4 w-4 mr-2" />
+                        <>
+                          <Save className="h-4 w-4 mr-2" />
+                          Save Changes
+                        </>
                       )}
-                      Save Changes
                     </Button>
                   </div>
                 </TabsContent>
