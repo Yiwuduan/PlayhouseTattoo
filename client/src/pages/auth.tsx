@@ -42,7 +42,10 @@ export default function AuthPage() {
         <CardContent>
           <Form {...form}>
             <form
-              onSubmit={form.handleSubmit((data) => loginMutation.mutate(data))}
+              onSubmit={form.handleSubmit((data) => {
+                console.log("Submitting with data:", data); // Debug log
+                loginMutation.mutate(data);
+              })}
               className="space-y-4"
             >
               <FormField
