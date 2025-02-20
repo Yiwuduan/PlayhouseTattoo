@@ -150,8 +150,9 @@ export async function registerRoutes(app: Express) {
       const artistId = parseInt(req.params.id);
       const { bio, specialties } = req.body;
 
-      if (!bio || !Array.isArray(specialties)) {
-        return res.status(400).json({ message: "Invalid request data" });
+      // Validate that at least one field is present
+      if (typeof bio !== 'string' || !Array.isArray(specialties)) {
+        return res.status(400).json({ message: "Invalid request data. Bio must be a string and specialties must be an array." });
       }
 
       const updatedArtist = await storage.updateArtist(artistId, {
