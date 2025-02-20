@@ -6,6 +6,7 @@ import { chatWithAI } from "./openai";
 import express from "express";
 import path from "path";
 import fs from "fs";
+import fileUpload from "express-fileupload";
 
 // Ensure uploads directory exists
 const uploadsDir = path.join(process.cwd(), 'uploads');
@@ -15,6 +16,12 @@ if (!fs.existsSync(uploadsDir)) {
 
 export async function registerRoutes(app: Express) {
   const httpServer = createServer(app);
+
+  // Configure express-fileupload middleware
+  app.use(fileUpload({
+    createParentPath: true,
+    limits: { fileSize: 50 * 1024 * 1024 }, // 50MB max file size
+  }));
 
   // Serve uploaded files statically
   app.use('/uploads', express.static(uploadsDir));
@@ -34,46 +41,66 @@ export async function registerRoutes(app: Express) {
   });
 
   app.post("/api/artists/:id/profile-image", async (req, res) => {
-    const artistId = parseInt(req.params.id);
-    if (!req.files || !req.files.image) {
-      res.status(400).json({ message: "No image file uploaded" });
-      return;
+    try {
+      const artistId = parseInt(req.params.id);
+      if (!req.files || !req.files.image) {
+        res.status(400).json({ message: "No image file uploaded" });
+        return;
+      }
+
+      const image = req.files.image;
+      if (Array.isArray(image)) {
+        res.status(400).json({ message: "Please upload only one image" });
+        return;
+      }
+
+      const fileName = `profile-${artistId}-${Date.now()}${path.extname(image.name)}`;
+      const filePath = path.join(uploadsDir, fileName);
+
+      await image.mv(filePath);
+      const imageUrl = `/uploads/${fileName}`;
+
+      await storage.updateArtistProfileImage(artistId, imageUrl);
+      res.json({ imageUrl });
+    } catch (error) {
+      console.error('Error uploading profile image:', error);
+      res.status(500).json({ message: "Failed to upload image" });
     }
-
-    const image = req.files.image;
-    const fileName = `profile-${artistId}-${Date.now()}${path.extname(image.name)}`;
-    const filePath = path.join(uploadsDir, fileName);
-
-    await image.mv(filePath);
-    const imageUrl = `/uploads/${fileName}`;
-
-    await storage.updateArtistProfileImage(artistId, imageUrl);
-    res.json({ imageUrl });
   });
 
   app.post("/api/artists/:id/portfolio", async (req, res) => {
-    const artistId = parseInt(req.params.id);
-    if (!req.files || !req.files.image) {
-      res.status(400).json({ message: "No image file uploaded" });
-      return;
+    try {
+      const artistId = parseInt(req.params.id);
+      if (!req.files || !req.files.image) {
+        res.status(400).json({ message: "No image file uploaded" });
+        return;
+      }
+
+      const image = req.files.image;
+      if (Array.isArray(image)) {
+        res.status(400).json({ message: "Please upload only one image" });
+        return;
+      }
+
+      const title = req.body.title || '';
+      const fileName = `portfolio-${artistId}-${Date.now()}${path.extname(image.name)}`;
+      const filePath = path.join(uploadsDir, fileName);
+
+      await image.mv(filePath);
+      const imageUrl = `/uploads/${fileName}`;
+
+      const portfolioItem = await storage.addPortfolioItem({
+        artistId,
+        imageUrl,
+        title,
+        description: null,
+        createdAt: new Date(),
+      });
+      res.json(portfolioItem);
+    } catch (error) {
+      console.error('Error uploading portfolio image:', error);
+      res.status(500).json({ message: "Failed to upload image" });
     }
-
-    const image = req.files.image;
-    const title = req.body.title || '';
-    const fileName = `portfolio-${artistId}-${Date.now()}${path.extname(image.name)}`;
-    const filePath = path.join(uploadsDir, fileName);
-
-    await image.mv(filePath);
-    const imageUrl = `/uploads/${fileName}`;
-
-    const portfolioItem = await storage.addPortfolioItem({
-      artistId,
-      imageUrl,
-      title,
-      description: null,
-      createdAt: new Date(),
-    });
-    res.json(portfolioItem);
   });
 
   app.post("/api/book", async (req, res) => {
