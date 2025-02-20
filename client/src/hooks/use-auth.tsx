@@ -25,17 +25,33 @@ const useLoginMutation = () => {
   const { toast } = useToast();
   return useMutation({
     mutationFn: async (credentials: LoginData) => {
-      const res = await apiRequest("POST", "/api/login", credentials);
-      return await res.json();
+      try {
+        const response = await fetch("/api/login", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(credentials),
+        });
+
+        if (!response.ok) {
+          const error = await response.json();
+          throw new Error(error.message || "Login failed");
+        }
+
+        return await response.json();
+      } catch (error) {
+        throw error;
+      }
     },
     onSuccess: (user: User) => {
       queryClient.setQueryData(["/api/user"], user);
     },
-    onError: () => {
+    onError: (error: Error) => {
       toast({
         variant: "destructive",
-        title: "Invalid password",
-        description: "Please try again",
+        title: "Login failed",
+        description: error.message || "Please try again",
       });
     },
   });

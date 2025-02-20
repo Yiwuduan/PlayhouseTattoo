@@ -21,6 +21,11 @@ export function setupAuth(app: Express) {
     resave: false,
     saveUninitialized: false,
     store: storage.sessionStore,
+    cookie: {
+      secure: process.env.NODE_ENV === "production",
+      httpOnly: true,
+      sameSite: "lax",
+    }
   };
 
   app.set("trust proxy", 1);
@@ -29,12 +34,16 @@ export function setupAuth(app: Express) {
   app.use(passport.session());
 
   passport.use(
-    new LocalStrategy((username, password, done) => {
-      // Simple password check, ignore username
-      if (password === MASTER_PASSWORD) {
-        return done(null, { id: 1, isAdmin: "true" });
+    new LocalStrategy(async (username: string, password: string, done) => {
+      try {
+        // Simple password check, ignore username
+        if (password === MASTER_PASSWORD) {
+          return done(null, { id: 1, isAdmin: "true" });
+        }
+        return done(null, false, { message: "Invalid password" });
+      } catch (error) {
+        return done(error);
       }
-      return done(null, false, { message: "Invalid password" });
     })
   );
 
@@ -44,17 +53,22 @@ export function setupAuth(app: Express) {
   });
 
   app.post("/api/login", (req, res, next) => {
-    passport.authenticate("local", (err, user, info) => {
+    console.log("Login attempt with:", { password: req.body.password });
+    passport.authenticate("local", (err: any, user: Express.User | false, info: { message?: string } | undefined) => {
       if (err) {
+        console.error("Login error:", err);
         return next(err);
       }
       if (!user) {
+        console.log("Authentication failed:", info?.message);
         return res.status(401).json({ message: info?.message || "Invalid password" });
       }
       req.logIn(user, (err) => {
         if (err) {
+          console.error("Login error:", err);
           return next(err);
         }
+        console.log("Authentication successful for user:", user);
         return res.json(user);
       });
     })(req, res, next);
@@ -68,11 +82,12 @@ export function setupAuth(app: Express) {
   });
 
   app.get("/api/user", (req, res) => {
-    if (!req.isAuthenticated()) return res.status(401).json({ message: "Not authenticated" });
+    if (!req.isAuthenticated()) {
+      return res.status(401).json({ message: "Not authenticated" });
+    }
     res.json(req.user);
   });
 
-  // Admin middleware
   const requireAdmin = (req: Express.Request, res: Response, next: Function) => {
     if (!req.isAuthenticated()) {
       return res.status(403).json({ message: "Unauthorized" });
@@ -80,6 +95,5 @@ export function setupAuth(app: Express) {
     next();
   };
 
-  // Protected admin routes
   app.use("/api/admin", requireAdmin);
 }
