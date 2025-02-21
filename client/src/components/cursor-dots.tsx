@@ -8,7 +8,7 @@ interface Position {
 
 export default function CursorDots() {
   const [mousePosition, setMousePosition] = useState<Position>({ x: 0, y: 0 });
-  console.log("Mouse position:", mousePosition); // Debug log
+  //console.log("Mouse position:", mousePosition); // Debug log removed
 
   // Smooth cursor movement using springs
   const springConfig = { damping: 25, stiffness: 250 };
@@ -28,38 +28,26 @@ export default function CursorDots() {
   }, []);
 
   return (
-    <>
-      {/* Main cursor with debug styles */}
+    <div className="custom-cursor">
       <motion.div
-        className="fixed pointer-events-none z-[9999]"
+        className="cursor-dot"
         style={{
           x: cursorX,
           y: cursorY,
-          translateX: "-50%",
-          translateY: "-50%",
-        }}
-      >
-        {/* Debug background color to verify visibility */}
-        <div 
-          className="relative w-[300px] h-[300px] rounded-full"
-          style={{
-            backgroundColor: "rgba(255, 0, 0, 0.1)", // Debug color
-            backdropFilter: "blur(8px)",
-            WebkitBackdropFilter: "blur(8px)",
-          }}
-        />
-      </motion.div>
-
-      {/* Small cursor dot */}
-      <motion.div
-        className="fixed pointer-events-none z-[9999] w-6 h-6 bg-red-500 rounded-full"
-        style={{
-          x: cursorX,
-          y: cursorY,
-          translateX: "-50%",
-          translateY: "-50%"
         }}
       />
-    </>
+      <motion.div
+        className="cursor-outline"
+        style={{
+          x: cursorX,
+          y: cursorY,
+          transition: {
+            type: "spring",
+            damping: 15,
+            stiffness: 150,
+          },
+        }}
+      />
+    </div>
   );
 }
