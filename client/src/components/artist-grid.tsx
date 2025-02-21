@@ -12,9 +12,27 @@ export default function ArtistGrid({ artists }: ArtistGridProps) {
       {artists.map((artist, i) => (
         <motion.div
           key={artist.id}
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: i * 0.1 }}
+          initial={{ 
+            opacity: 0, 
+            x: i % 2 === 0 ? -50 : 50, // Alternate between left and right
+            y: 20 
+          }}
+          whileInView={{ 
+            opacity: 1, 
+            x: 0, 
+            y: 0 
+          }}
+          viewport={{ 
+            once: true,
+            margin: "-100px"
+          }}
+          transition={{ 
+            duration: 0.8,
+            delay: i * 0.2, // Increased delay for more noticeable stagger
+            type: "spring",
+            damping: 20,
+            stiffness: 100
+          }}
         >
           <Link href={`/artists/${artist.slug}`}>
             <a className="group block">
