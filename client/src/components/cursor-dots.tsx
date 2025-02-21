@@ -11,24 +11,39 @@ interface Dot {
 export default function CursorDots() {
   const [dots, setDots] = useState<Dot[]>([]);
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
-  const DOT_SPACING = 35; 
-  const ACTIVATION_DISTANCE = 60; 
+  const DOT_SPACING = 30; // Adjusted for tighter honeycomb
+  const ROW_HEIGHT = DOT_SPACING * Math.sqrt(3) / 2; // Height between rows for hexagonal pattern
+  const ACTIVATION_DISTANCE = 80; // Increased to affect more dots
 
-  // Initialize dots grid
+  // Initialize dots in honeycomb pattern
   useEffect(() => {
     const generateDots = () => {
       const newDots: Dot[] = [];
       const w = window.innerWidth;
       const h = window.innerHeight;
 
-      // Add padding to avoid dots at the very edge
-      for (let x = DOT_SPACING; x < w - DOT_SPACING; x += DOT_SPACING) {
-        for (let y = DOT_SPACING; y < h - DOT_SPACING; y += DOT_SPACING) {
-          newDots.push({
-            x,
-            y,
-            id: `${x}-${y}`,
-          });
+      // Calculate number of rows and cols needed
+      const rows = Math.ceil(h / ROW_HEIGHT);
+      const cols = Math.ceil(w / DOT_SPACING);
+
+      // Generate honeycomb grid
+      for (let row = 0; row < rows; row++) {
+        const isOddRow = row % 2 === 1;
+        // Offset every other row by half the spacing
+        const xOffset = isOddRow ? DOT_SPACING / 2 : 0;
+
+        for (let col = 0; col < cols; col++) {
+          const x = col * DOT_SPACING + xOffset;
+          const y = row * ROW_HEIGHT;
+
+          // Only add dots within the viewport (with padding)
+          if (x > 0 && x < w - DOT_SPACING && y > 0 && y < h - ROW_HEIGHT) {
+            newDots.push({
+              x,
+              y,
+              id: `${x}-${y}`,
+            });
+          }
         }
       }
       setDots(newDots);
@@ -36,7 +51,6 @@ export default function CursorDots() {
 
     generateDots();
 
-    // Throttle resize handler
     const throttledResize = throttle(generateDots, 200);
     window.addEventListener('resize', throttledResize);
     return () => window.removeEventListener('resize', throttledResize);
@@ -69,16 +83,16 @@ export default function CursorDots() {
         }
 
         const scale = distance < ACTIVATION_DISTANCE
-          ? 1 + (1 - distance / ACTIVATION_DISTANCE) * 0.8 
+          ? 1 + (1 - distance / ACTIVATION_DISTANCE) 
           : 1;
         const opacity = distance < ACTIVATION_DISTANCE
-          ? (1 - distance / ACTIVATION_DISTANCE) * 0.5 
+          ? (1 - distance / ACTIVATION_DISTANCE) * 0.6
           : 0;
 
         return (
           <motion.div
             key={dot.id}
-            className="absolute w-[2px] h-[2px] bg-foreground/60 rounded-full" 
+            className="absolute w-[3px] h-[3px] bg-foreground/50 rounded-full" // Slightly larger dots
             style={{
               left: dot.x,
               top: dot.y,
@@ -88,8 +102,9 @@ export default function CursorDots() {
               opacity,
             }}
             transition={{
-              type: "tween", 
-              duration: 0.15, 
+              type: "spring",
+              stiffness: 200,
+              damping: 20,
             }}
           />
         );
