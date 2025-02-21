@@ -21,7 +21,10 @@ export default function About() {
     return null;
   }
 
-  const values = aboutContent.values as Array<{ title: string; description: string }>;
+  // Parse the values from JSON string if it's a string
+  const values = typeof aboutContent.values === 'string' 
+    ? JSON.parse(aboutContent.values) 
+    : aboutContent.values;
 
   return (
     <div className="pt-24 pb-16">
@@ -74,7 +77,7 @@ export default function About() {
           {aboutContent.philosophyContent}
         </p>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {values.map((item) => (
+          {values.map((item: { title: string; description: string }) => (
             <div key={item.title} className="p-6">
               <h3 className="text-xl font-bold mb-4">{item.title}</h3>
               <p className="text-muted-foreground">{item.description}</p>
