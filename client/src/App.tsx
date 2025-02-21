@@ -15,6 +15,7 @@ import Admin from "@/pages/admin";
 import Auth from "@/pages/auth";
 import NotFound from "@/pages/not-found";
 import Chatbot from "@/components/chatbot";
+import CursorDots from "@/components/cursor-dots";
 
 function Router() {
   return (
@@ -43,6 +44,7 @@ function App() {
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
         <Router />
+        <CursorDots />
         <Toaster />
       </AuthProvider>
     </QueryClientProvider>
