@@ -157,11 +157,14 @@ export default function AdminPage() {
   });
 
   const addPortfolioItemMutation = useMutation({
-    mutationFn: async ({ artistId, file, title }: { artistId: number; file: File; title: string }) => {
+    mutationFn: async ({ 
+      artistId, 
+      formData 
+    }: { 
+      artistId: number; 
+      formData: FormData;
+    }) => {
       setUploadingPortfolio(artistId);
-      const formData = new FormData();
-      formData.append("image", file);
-      formData.append("title", title);
 
       const response = await fetch(`/api/artists/${artistId}/portfolio`, {
         method: 'POST',
@@ -169,8 +172,8 @@ export default function AdminPage() {
       });
 
       if (!response.ok) {
-        const errorData = await response.json().catch(() => ({ message: 'Failed to upload image' }));
-        throw new Error(errorData.message || 'Failed to upload image');
+        const errorData = await response.json().catch(() => ({ message: 'Failed to upload images' }));
+        throw new Error(errorData.message || 'Failed to upload images');
       }
 
       return response.json();
@@ -182,14 +185,14 @@ export default function AdminPage() {
       });
       toast({
         title: "Success",
-        description: "Portfolio item added successfully",
+        description: "Portfolio items added successfully",
       });
       setUploadingPortfolio(null);
     },
     onError: (error: Error) => {
       toast({
         title: "Error",
-        description: error.message || "Failed to add portfolio item",
+        description: error.message || "Failed to add portfolio items",
         variant: "destructive",
       });
       setUploadingPortfolio(null);
@@ -356,21 +359,25 @@ export default function AdminPage() {
 
                 <TabsContent value="portfolio" className="space-y-4">
                   <div className="grid w-full max-w-sm items-center gap-1.5">
-                    <Label htmlFor={`portfolio-${artist.id}`}>Add Portfolio Item</Label>
+                    <Label htmlFor={`portfolio-${artist.id}`}>Add Portfolio Items</Label>
                     <div className="flex items-center gap-4">
                       <Input
                         id={`portfolio-${artist.id}`}
                         type="file"
                         accept="image/*"
+                        multiple
                         disabled={uploadingPortfolio === artist.id}
                         onChange={(e) => {
-                          const file = e.target.files?.[0];
-                          if (file) {
-                            const title = file.name.split('.')[0];
+                          const files = e.target.files;
+                          if (files && files.length > 0) {
+                            const formData = new FormData();
+                            Array.from(files).forEach((file) => {
+                              formData.append('images', file);
+                            });
+
                             addPortfolioItemMutation.mutate({ 
                               artistId: artist.id, 
-                              file,
-                              title 
+                              formData
                             });
                           }
                         }}

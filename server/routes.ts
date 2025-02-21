@@ -79,45 +79,54 @@ export async function registerRoutes(app: Express) {
     try {
       const artistId = parseInt(req.params.id);
 
-      if (!req.files || !req.files.image) {
-        return res.status(400).json({ message: "No image file uploaded" });
+      if (!req.files || !req.files.images) {
+        return res.status(400).json({ message: "No images uploaded" });
       }
 
-      const image = req.files.image as UploadedFile;
+      const images = Array.isArray(req.files.images) 
+        ? req.files.images 
+        : [req.files.images];
 
-      if (Array.isArray(image)) {
-        return res.status(400).json({ message: "Please upload only one image" });
+      const portfolioItems = [];
+
+      for (const image of images) {
+        // Validate file type
+        if (!image.mimetype.startsWith('image/')) {
+          return res.status(400).json({ 
+            message: `File ${image.name} is not an image`
+          });
+        }
+
+        const title = image.name.split('.')[0];
+        const fileName = `portfolio-${artistId}-${Date.now()}-${image.name}`;
+        const filePath = path.join(uploadsDir, fileName);
+
+        try {
+          await image.mv(filePath);
+        } catch (err) {
+          console.error('Error moving file:', err);
+          return res.status(500).json({ 
+            message: `Failed to save image file ${image.name}`
+          });
+        }
+
+        const imageUrl = `/uploads/${fileName}`;
+        const portfolioItem = await storage.addPortfolioItem({
+          artistId,
+          imageUrl,
+          title,
+          description: null,
+          createdAt: new Date(),
+        });
+
+        portfolioItems.push(portfolioItem);
       }
 
-      // Validate file type
-      if (!image.mimetype.startsWith('image/')) {
-        return res.status(400).json({ message: "Please upload only image files" });
-      }
-
-      const title = req.body.title || '';
-      const fileName = `portfolio-${artistId}-${Date.now()}${path.extname(image.name)}`;
-      const filePath = path.join(uploadsDir, fileName);
-
-      try {
-        await image.mv(filePath);
-      } catch (err) {
-        console.error('Error moving file:', err);
-        return res.status(500).json({ message: "Failed to save image file" });
-      }
-
-      const imageUrl = `/uploads/${fileName}`;
-      const portfolioItem = await storage.addPortfolioItem({
-        artistId,
-        imageUrl,
-        title,
-        description: null,
-        createdAt: new Date(),
-      });
-      return res.json(portfolioItem);
+      return res.json(portfolioItems);
     } catch (error: any) {
-      console.error('Error uploading portfolio image:', error);
+      console.error('Error uploading portfolio images:', error);
       return res.status(500).json({ 
-        message: "Failed to upload image", 
+        message: "Failed to upload images", 
         error: error.message || 'Unknown error occurred'
       });
     }
