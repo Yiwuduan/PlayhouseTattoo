@@ -35,7 +35,8 @@ export default function CursorDots() {
           x: cursorX,
           y: cursorY,
           translateX: "-50%",
-          translateY: "-50%"
+          translateY: "-50%",
+          filter: "url(#goo)",
         }}
         animate={{
           scale: [1, 1.05, 1],
@@ -47,6 +48,20 @@ export default function CursorDots() {
           ease: "linear"
         }}
       >
+        <svg width="0" height="0">
+          <defs>
+            <filter id="goo">
+              <feGaussianBlur in="SourceGraphic" stdDeviation="10" result="blur" />
+              <feColorMatrix
+                in="blur"
+                mode="matrix"
+                values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 30 -10"
+                result="goo"
+              />
+              <feComposite in="SourceGraphic" in2="goo" operator="atop" />
+            </filter>
+          </defs>
+        </svg>
         <div 
           className="relative w-[300px] h-[300px] rounded-full"
           style={{
