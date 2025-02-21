@@ -7,6 +7,7 @@ import express from "express";
 import path from "path";
 import fs from "fs";
 import type { UploadedFile } from "express-fileupload";
+import { compressAndSaveImage } from "./utils/image";
 
 // Ensure uploads directory exists
 const uploadsDir = path.join(process.cwd(), 'uploads');
@@ -57,10 +58,14 @@ export async function registerRoutes(app: Express) {
       const filePath = path.join(uploadsDir, fileName);
 
       try {
-        await image.mv(filePath);
+        // Use the new compression utility
+        await compressAndSaveImage(image, filePath, {
+          quality: 80,
+          maxWidth: 800 // Profile images can be smaller
+        });
       } catch (err) {
-        console.error('Error moving file:', err);
-        return res.status(500).json({ message: "Failed to save image file" });
+        console.error('Error processing image:', err);
+        return res.status(500).json({ message: "Failed to process image file" });
       }
 
       const imageUrl = `/uploads/${fileName}`;
@@ -102,11 +107,15 @@ export async function registerRoutes(app: Express) {
         const filePath = path.join(uploadsDir, fileName);
 
         try {
-          await image.mv(filePath);
+          // Use the new compression utility with higher quality for portfolio images
+          await compressAndSaveImage(image, filePath, {
+            quality: 85,
+            maxWidth: 1200 // Larger size for portfolio images
+          });
         } catch (err) {
-          console.error('Error moving file:', err);
+          console.error('Error processing image:', err);
           return res.status(500).json({ 
-            message: `Failed to save image file ${image.name}`
+            message: `Failed to process image file ${image.name}`
           });
         }
 
