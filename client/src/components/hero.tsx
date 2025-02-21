@@ -1,7 +1,31 @@
-import { motion } from "framer-motion";
+import { motion, useScroll, useTransform } from "framer-motion";
 import PortfolioGallery from "./portfolio-gallery";
+import { useEffect, useState } from "react";
 
 export default function Hero() {
+  const { scrollY } = useScroll();
+  const [scrollProgress, setScrollProgress] = useState(0);
+
+  // Update scroll progress on scroll
+  useEffect(() => {
+    return scrollY.onChange((latest) => {
+      // Calculate progress based on viewport height
+      const progress = Math.min(latest / (window.innerHeight * 0.5), 1);
+      setScrollProgress(progress);
+    });
+  }, [scrollY]);
+
+  // Calculate colors based on scroll progress
+  const color = useTransform(
+    scrollY,
+    [0, window.innerHeight * 0.25, window.innerHeight * 0.5],
+    [
+      "rgb(0, 0, 0)", // Black
+      "rgb(255, 20, 147)", // Deep pink
+      "rgb(135, 206, 235)", // Sky blue
+    ]
+  );
+
   return (
     <motion.section 
       initial={{ opacity: 0 }}
@@ -12,6 +36,7 @@ export default function Hero() {
       <motion.h1 
         initial={{ y: 20 }}
         animate={{ y: 0 }}
+        style={{ color }}
         className="text-6xl md:text-8xl font-bold tracking-tighter"
       >
         WELCOME BACK
