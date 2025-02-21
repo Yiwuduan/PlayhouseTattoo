@@ -1,7 +1,28 @@
 import { motion } from "framer-motion";
+import { useQuery } from "@tanstack/react-query";
+import type { AboutContent } from "@shared/schema";
 import MapSection from "@/components/map-section";
+import { Loader2 } from "lucide-react";
 
 export default function About() {
+  const { data: aboutContent, isLoading } = useQuery<AboutContent>({
+    queryKey: ['/api/about']
+  });
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <Loader2 className="h-8 w-8 animate-spin" />
+      </div>
+    );
+  }
+
+  if (!aboutContent) {
+    return null;
+  }
+
+  const values = aboutContent.values as Array<{ title: string; description: string }>;
+
   return (
     <div className="pt-24 pb-16">
       <motion.section
@@ -10,11 +31,10 @@ export default function About() {
         className="max-w-4xl mx-auto text-center mb-16"
       >
         <h1 className="text-4xl md:text-6xl font-bold tracking-tighter mb-8">
-          OUR STORY
+          {aboutContent.storyTitle}
         </h1>
         <p className="text-lg text-muted-foreground mb-12">
-          Playhouse is more than just a tattoo shop – it's a creative sanctuary where art
-          meets skin, and stories come to life through ink.
+          {aboutContent.storyContent}
         </p>
       </motion.section>
 
@@ -33,15 +53,10 @@ export default function About() {
         </div>
         <div>
           <h2 className="text-3xl font-bold tracking-tighter mb-6">
-            THE SPACE
+            {aboutContent.spaceTitle}
           </h2>
-          <p className="text-muted-foreground mb-6">
-            Located in the heart of the city, our studio is designed to inspire creativity
-            and provide a comfortable, luxurious environment for our clients and artists alike.
-          </p>
           <p className="text-muted-foreground">
-            Every detail has been carefully considered to create an atmosphere that's both
-            welcoming and professionally focused.
+            {aboutContent.spaceContent}
           </p>
         </div>
       </motion.div>
@@ -53,28 +68,13 @@ export default function About() {
         className="text-center max-w-4xl mx-auto mb-24"
       >
         <h2 className="text-3xl font-bold tracking-tighter mb-6">
-          OUR PHILOSOPHY
+          {aboutContent.philosophyTitle}
         </h2>
         <p className="text-lg text-muted-foreground mb-8">
-          At Playhouse, we believe that every tattoo tells a story. Our artists work
-          closely with clients to bring their visions to life, creating unique pieces
-          that stand the test of time.
+          {aboutContent.philosophyContent}
         </p>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {[
-            {
-              title: "QUALITY",
-              description: "Uncompromising attention to detail in every piece"
-            },
-            {
-              title: "SAFETY",
-              description: "Strict sterilization and safety protocols"
-            },
-            {
-              title: "ARTISTRY",
-              description: "Continuous evolution of craft and style"
-            }
-          ].map((item) => (
+          {values.map((item) => (
             <div key={item.title} className="p-6">
               <h3 className="text-xl font-bold mb-4">{item.title}</h3>
               <p className="text-muted-foreground">{item.description}</p>

@@ -54,11 +54,25 @@ export const bookings = pgTable("bookings", {
   date: timestamp("date").notNull(),
 });
 
-// Schema for user operations
+// About page content
+export const aboutContent = pgTable("about_content", {
+  id: serial("id").primaryKey(),
+  storyTitle: text("story_title").notNull().default("OUR STORY"),
+  storyContent: text("story_content").notNull(),
+  spaceTitle: text("space_title").notNull().default("THE SPACE"),
+  spaceContent: text("space_content").notNull(),
+  philosophyTitle: text("philosophy_title").notNull().default("OUR PHILOSOPHY"),
+  philosophyContent: text("philosophy_content").notNull(),
+  values: jsonb("values").notNull(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Schema for operations
 export const insertUserSchema = createInsertSchema(users);
 export const insertArtistSchema = createInsertSchema(artists);
 export const insertPortfolioItemSchema = createInsertSchema(portfolioItems);
 export const insertBookingSchema = createInsertSchema(bookings);
+export const insertAboutContentSchema = createInsertSchema(aboutContent);
 
 // Type definitions
 export type User = typeof users.$inferSelect;
@@ -67,6 +81,7 @@ export type Artist = typeof artists.$inferSelect;
 export type InsertArtist = z.infer<typeof insertArtistSchema>;
 export type PortfolioItem = typeof portfolioItems.$inferSelect;
 export type InsertPortfolioItem = z.infer<typeof insertPortfolioItemSchema>;
-import type { InferSelect } from 'drizzle-orm';
+export type AboutContent = typeof aboutContent.$inferSelect;
+export type InsertAboutContent = z.infer<typeof insertAboutContentSchema>;
 export type Booking = typeof bookings.$inferSelect;
 export type InsertBooking = z.infer<typeof insertBookingSchema>;
