@@ -11,9 +11,9 @@ interface Dot {
 export default function CursorDots() {
   const [dots, setDots] = useState<Dot[]>([]);
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
-  const DOT_SPACING = 15; // Reduced from 30
+  const DOT_SPACING = 25; // Increased from 15 to make dots less dense
   const ROW_HEIGHT = DOT_SPACING * Math.sqrt(3) / 2;
-  const ACTIVATION_DISTANCE = 40; // Reduced from 80
+  const ACTIVATION_DISTANCE = 40; // Keeping the same range
 
   // Initialize dots in honeycomb pattern
   const generateDots = useCallback(() => {
