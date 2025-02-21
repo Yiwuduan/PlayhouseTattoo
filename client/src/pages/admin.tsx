@@ -498,6 +498,7 @@ export default function AdminPage() {
                             ...prev,
                             storyTitle: e.target.value
                           }))}
+                          placeholder="Our Story"
                         />
                       </div>
                       <div className="space-y-2">
@@ -509,6 +510,7 @@ export default function AdminPage() {
                             ...prev,
                             storyContent: e.target.value
                           }))}
+                          placeholder="Share your studio's story and mission..."
                           rows={4}
                         />
                       </div>
@@ -524,6 +526,7 @@ export default function AdminPage() {
                             ...prev,
                             spaceTitle: e.target.value
                           }))}
+                          placeholder="Our Space"
                         />
                       </div>
                       <div className="space-y-2">
@@ -535,6 +538,7 @@ export default function AdminPage() {
                             ...prev,
                             spaceContent: e.target.value
                           }))}
+                          placeholder="Describe your studio's environment and facilities..."
                           rows={4}
                         />
                       </div>
@@ -550,6 +554,7 @@ export default function AdminPage() {
                             ...prev,
                             philosophyTitle: e.target.value
                           }))}
+                          placeholder="Our Philosophy"
                         />
                       </div>
                       <div className="space-y-2">
@@ -561,8 +566,65 @@ export default function AdminPage() {
                             ...prev,
                             philosophyContent: e.target.value
                           }))}
+                          placeholder="Share your studio's values and philosophy..."
                           rows={4}
                         />
+                      </div>
+                    </div>
+
+                    <div className="space-y-4">
+                      <Label>Studio Values</Label>
+                      <div className="grid gap-4">
+                        {(aboutState.values || []).map((value, index) => (
+                          <div key={index} className="grid gap-4 p-4 border rounded-lg">
+                            <div className="space-y-2">
+                              <Label htmlFor={`value-title-${index}`}>Value Title</Label>
+                              <Input
+                                id={`value-title-${index}`}
+                                value={value.title || ''}
+                                onChange={(e) => {
+                                  const newValues = [...(aboutState.values || [])];
+                                  newValues[index] = { ...newValues[index], title: e.target.value };
+                                  setAboutState(prev => ({ ...prev, values: newValues }));
+                                }}
+                                placeholder="Value Title"
+                              />
+                            </div>
+                            <div className="space-y-2">
+                              <Label htmlFor={`value-description-${index}`}>Value Description</Label>
+                              <Textarea
+                                id={`value-description-${index}`}
+                                value={value.description || ''}
+                                onChange={(e) => {
+                                  const newValues = [...(aboutState.values || [])];
+                                  newValues[index] = { ...newValues[index], description: e.target.value };
+                                  setAboutState(prev => ({ ...prev, values: newValues }));
+                                }}
+                                placeholder="Value Description"
+                                rows={3}
+                              />
+                            </div>
+                            <Button
+                              variant="destructive"
+                              size="sm"
+                              onClick={() => {
+                                const newValues = aboutState.values?.filter((_, i) => i !== index) || [];
+                                setAboutState(prev => ({ ...prev, values: newValues }));
+                              }}
+                            >
+                              Remove Value
+                            </Button>
+                          </div>
+                        ))}
+                        <Button
+                          variant="outline"
+                          onClick={() => {
+                            const newValues = [...(aboutState.values || []), { title: '', description: '' }];
+                            setAboutState(prev => ({ ...prev, values: newValues }));
+                          }}
+                        >
+                          Add Value
+                        </Button>
                       </div>
                     </div>
 
