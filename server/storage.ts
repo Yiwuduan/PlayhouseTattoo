@@ -11,6 +11,7 @@ export interface IStorage {
   getArtistBySlug(slug: string): Promise<(Artist & { portfolioItems: PortfolioItem[] }) | undefined>;
   createBooking(booking: InsertBooking): Promise<Booking>;
   addPortfolioItem(item: InsertPortfolioItem): Promise<PortfolioItem>;
+  deletePortfolioItem(itemId: number): Promise<void>;
   updateArtistProfileImage(artistId: number, imageUrl: string): Promise<void>;
   updateArtist(artistId: number, data: { bio: string; specialties: string[] }): Promise<Artist>;
   // User-related methods
@@ -90,6 +91,12 @@ export class DatabaseStorage implements IStorage {
       .values(item)
       .returning();
     return portfolioItem;
+  }
+
+  async deletePortfolioItem(itemId: number): Promise<void> {
+    await db
+      .delete(portfolioItems)
+      .where(eq(portfolioItems.id, itemId));
   }
 
   // User-related methods implementation

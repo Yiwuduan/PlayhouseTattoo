@@ -9,7 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Loader2, Upload, Save } from "lucide-react";
+import { Loader2, Upload, Save, Trash2 } from "lucide-react";
 import { queryClient } from "@/lib/queryClient";
 import { useEffect, useState } from "react";
 import { useLocation } from "wouter";
@@ -196,6 +196,37 @@ export default function AdminPage() {
     },
   });
 
+  const deletePortfolioItemMutation = useMutation({
+    mutationFn: async (itemId: number) => {
+      const response = await fetch(`/api/portfolio-items/${itemId}`, {
+        method: 'DELETE',
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({ message: 'Failed to delete image' }));
+        throw new Error(errorData.message || 'Failed to delete image');
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/artists'] });
+      queryClient.invalidateQueries({ 
+        predicate: (query) => typeof query.queryKey[0] === 'string' && query.queryKey[0].startsWith('/api/artists/') 
+      });
+      toast({
+        title: "Success",
+        description: "Portfolio item deleted successfully",
+      });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to delete portfolio item",
+        variant: "destructive",
+      });
+    },
+  });
+
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -351,12 +382,29 @@ export default function AdminPage() {
                   </div>
                   <div className="grid grid-cols-3 gap-4">
                     {artist.portfolioItems.map((item) => (
-                      <div key={item.id} className="relative">
+                      <div key={item.id} className="relative group">
                         <img
                           src={`${item.imageUrl}?${Date.now()}`}
                           alt={item.title || "Portfolio item"}
                           className="w-full aspect-square object-cover rounded-lg"
                         />
+                        <Button
+                          variant="destructive"
+                          size="icon"
+                          className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity"
+                          onClick={() => {
+                            if (window.confirm('Are you sure you want to delete this portfolio item?')) {
+                              deletePortfolioItemMutation.mutate(item.id);
+                            }
+                          }}
+                          disabled={deletePortfolioItemMutation.isPending}
+                        >
+                          {deletePortfolioItemMutation.isPending ? (
+                            <Loader2 className="h-4 w-4 animate-spin" />
+                          ) : (
+                            <Trash2 className="h-4 w-4" />
+                          )}
+                        </Button>
                       </div>
                     ))}
                   </div>

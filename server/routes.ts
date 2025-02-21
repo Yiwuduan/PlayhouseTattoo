@@ -193,5 +193,23 @@ export async function registerRoutes(app: Express) {
     }
   });
 
+  app.delete("/api/portfolio-items/:id", async (req, res) => {
+    try {
+      const itemId = parseInt(req.params.id);
+      if (isNaN(itemId)) {
+        return res.status(400).json({ message: "Invalid portfolio item ID" });
+      }
+
+      await storage.deletePortfolioItem(itemId);
+      return res.status(204).send();
+    } catch (error: any) {
+      console.error('Error deleting portfolio item:', error);
+      return res.status(500).json({ 
+        message: "Failed to delete portfolio item", 
+        error: error.message || 'Unknown error occurred'
+      });
+    }
+  });
+
   return httpServer;
 }
