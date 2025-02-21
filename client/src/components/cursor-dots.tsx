@@ -50,7 +50,7 @@ export default function CursorDots() {
   }, []);
 
   return (
-    <div className="fixed inset-0 pointer-events-none">
+    <div className="fixed inset-0 pointer-events-none -z-10"> {/* Added -z-10 to place behind content */}
       {dots.map((dot) => {
         const distance = Math.sqrt(
           Math.pow(mousePos.x - dot.x, 2) + Math.pow(mousePos.y - dot.y, 2)
@@ -59,8 +59,8 @@ export default function CursorDots() {
           ? 1 + (1 - distance / ACTIVATION_DISTANCE) * 1
           : 1;
         const opacity = distance < ACTIVATION_DISTANCE
-          ? (1 - distance / ACTIVATION_DISTANCE)
-          : 0; // Completely invisible when not activated
+          ? (1 - distance / ACTIVATION_DISTANCE) * 0.5 // Reduced max opacity to 0.5
+          : 0;
 
         return (
           <motion.div
