@@ -59,8 +59,8 @@ export default function CursorDots() {
           ? 1 + (1 - distance / ACTIVATION_DISTANCE) * 1
           : 1;
         const opacity = distance < ACTIVATION_DISTANCE
-          ? 0.05 + (1 - distance / ACTIVATION_DISTANCE) * 0.95
-          : 0.05; // Reduced base opacity from 0.2 to 0.05
+          ? (1 - distance / ACTIVATION_DISTANCE)
+          : 0; // Completely invisible when not activated
 
         return (
           <motion.div
