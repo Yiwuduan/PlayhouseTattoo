@@ -1,4 +1,4 @@
-import { type Artist, type InsertArtist, type Booking, type InsertBooking, type PortfolioItem, type InsertPortfolioItem, type User, type InsertUser, artists, bookings, portfolioItems, users } from "@shared/schema";
+import { type Artist, type InsertArtist, type Booking, type InsertBooking, type PortfolioItem, type InsertPortfolioItem, type User, type InsertUser, type AboutContent, artists, bookings, portfolioItems, users, aboutContent } from "@shared/schema";
 import { db } from "./db";
 import { eq } from "drizzle-orm";
 import session from "express-session";
@@ -14,6 +14,9 @@ export interface IStorage {
   deletePortfolioItem(itemId: number): Promise<void>;
   updateArtistProfileImage(artistId: number, imageUrl: string): Promise<void>;
   updateArtist(artistId: number, data: { bio: string; specialties: string[] }): Promise<Artist>;
+  // About page methods
+  getAboutContent(): Promise<AboutContent>;
+  updateAboutContent(content: Partial<AboutContent>): Promise<AboutContent>;
   // User-related methods
   getUser(id: number): Promise<User | undefined>;
   getUserByUsername(username: string): Promise<User | undefined>;
@@ -116,6 +119,19 @@ export class DatabaseStorage implements IStorage {
       .values(insertUser)
       .returning();
     return user;
+  }
+
+  async getAboutContent(): Promise<AboutContent> {
+    const [content] = await db.select().from(aboutContent);
+    return content;
+  }
+
+  async updateAboutContent(content: Partial<AboutContent>): Promise<AboutContent> {
+    const [updatedContent] = await db
+      .update(aboutContent)
+      .set(content)
+      .returning();
+    return updatedContent;
   }
 }
 

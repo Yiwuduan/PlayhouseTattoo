@@ -229,5 +229,35 @@ export async function registerRoutes(app: Express) {
     }
   });
 
+  app.get("/api/about", async (_req, res) => {
+    try {
+      const content = await storage.getAboutContent();
+      res.json(content);
+    } catch (error: any) {
+      console.error('Error fetching about content:', error);
+      res.status(500).json({ 
+        message: "Failed to fetch about content", 
+        error: error.message || 'Unknown error occurred'
+      });
+    }
+  });
+
+  app.patch("/api/about", async (req, res) => {
+    try {
+      if (!req.isAuthenticated()) {
+        return res.status(403).json({ message: "Unauthorized" });
+      }
+
+      const updatedContent = await storage.updateAboutContent(req.body);
+      res.json(updatedContent);
+    } catch (error: any) {
+      console.error('Error updating about content:', error);
+      res.status(500).json({ 
+        message: "Failed to update about content", 
+        error: error.message || 'Unknown error occurred'
+      });
+    }
+  });
+
   return httpServer;
 }
