@@ -15,10 +15,12 @@ import Admin from "@/pages/admin";
 import Auth from "@/pages/auth";
 import NotFound from "@/pages/not-found";
 import Chatbot from "@/components/chatbot";
+import CursorDots from "@/components/cursor-dots";
 
 function Router() {
   return (
     <div className="flex min-h-screen flex-col bg-background">
+      <CursorDots />
       <Navbar />
       <main className="container mx-auto flex-1 px-4">
         <Switch>
