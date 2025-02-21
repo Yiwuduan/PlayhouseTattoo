@@ -10,8 +10,8 @@ interface Dot {
 export default function CursorDots() {
   const [dots, setDots] = useState<Dot[]>([]);
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
-  const DOT_SPACING = 50; // Space between dots in pixels
-  const ACTIVATION_DISTANCE = 100; // Distance at which dots start to react
+  const DOT_SPACING = 25; // Reduced from 50 to make dots more dense
+  const ACTIVATION_DISTANCE = 80; // Slightly reduced from 100 to maintain performance
 
   // Initialize dots grid
   useEffect(() => {
@@ -59,8 +59,8 @@ export default function CursorDots() {
           ? 1 + (1 - distance / ACTIVATION_DISTANCE) * 1
           : 1;
         const opacity = distance < ACTIVATION_DISTANCE
-          ? 0.2 + (1 - distance / ACTIVATION_DISTANCE) * 0.8
-          : 0.2;
+          ? 0.05 + (1 - distance / ACTIVATION_DISTANCE) * 0.95
+          : 0.05; // Reduced base opacity from 0.2 to 0.05
 
         return (
           <motion.div
