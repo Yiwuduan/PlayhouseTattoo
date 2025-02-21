@@ -30,27 +30,37 @@ export default function CursorDots() {
     <>
       {/* Main distortion lens */}
       <motion.div
-        className="fixed pointer-events-none z-50 mix-blend-difference"
+        className="fixed pointer-events-none z-50"
         style={{
           x: cursorX,
           y: cursorY,
           translateX: "-50%",
           translateY: "-50%"
         }}
+        animate={{
+          scale: [1, 1.05, 1],
+          rotate: [0, 5, -5, 0]
+        }}
+        transition={{
+          duration: 4,
+          repeat: Infinity,
+          ease: "linear"
+        }}
       >
         <div 
-          className="relative w-[150px] h-[150px] rounded-full"
+          className="relative w-[200px] h-[200px] rounded-full"
           style={{
-            background: "radial-gradient(circle at center, transparent 0%, rgba(255,255,255,0.03) 100%)",
-            backdropFilter: "blur(8px) contrast(150%) hue-rotate(10deg)",
-            WebkitBackdropFilter: "blur(8px) contrast(150%) hue-rotate(10deg)",
+            background: "radial-gradient(circle at center, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.05) 50%, transparent 70%)",
+            backdropFilter: "blur(12px) contrast(180%) hue-rotate(30deg) brightness(1.2)",
+            WebkitBackdropFilter: "blur(12px) contrast(180%) hue-rotate(30deg) brightness(1.2)",
+            mixBlendMode: "difference"
           }}
         />
       </motion.div>
 
       {/* Small cursor dot */}
       <motion.div
-        className="fixed pointer-events-none z-50 w-3 h-3 bg-white rounded-full mix-blend-difference"
+        className="fixed pointer-events-none z-50 w-4 h-4 bg-white rounded-full mix-blend-difference"
         style={{
           x: cursorX,
           y: cursorY,
