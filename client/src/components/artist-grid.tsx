@@ -14,7 +14,7 @@ export default function ArtistGrid({ artists }: ArtistGridProps) {
           key={artist.id}
           initial={{ 
             opacity: 0, 
-            x: i % 2 === 0 ? -50 : 50, // Alternate between left and right
+            x: i % 2 === 0 ? -50 : 50,
             y: 20 
           }}
           whileInView={{ 
@@ -28,14 +28,14 @@ export default function ArtistGrid({ artists }: ArtistGridProps) {
           }}
           transition={{ 
             duration: 0.8,
-            delay: i * 0.2, // Increased delay for more noticeable stagger
+            delay: i * 0.2,
             type: "spring",
             damping: 20,
             stiffness: 100
           }}
         >
           <Link href={`/artists/${artist.slug}`}>
-            <a className="group block">
+            <a className="group block relative z-10">
               <div className="aspect-square overflow-hidden bg-muted">
                 {artist.profileImage ? (
                   <img
